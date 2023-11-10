@@ -89,6 +89,8 @@ public class Team {
     /**
      * Takes a string representing the score of a match and returns whether its format is incorrect.
      * A correctly formatted score consists of two nonnegative integers separated by a '-'.
+     * Examples of correctly formatted scores: "0-0", "0-2", "1-0", "2-3", "10-20"
+     * Examples of incorrectly formatted scores: "02-1", "3-00", "2- 1", "5s-3"
      *
      * @param score The score of a match played by the team.
      * @return true if the score is incorrectly formatted, false otherwise.
@@ -105,7 +107,7 @@ public class Team {
      * This method will be called by the TeamFactory class to ensure uniqueness of all Team instances.
      *
      * @param name The name of the instance.
-     * @param matches A string->string map that represents the matches played.
+     * @param matches A string->string map that represents the matches the team has played.
      * @throws IllegalArgumentException If at least one score is incorrectly formatted.
      */
     public static Team createInstance(String name, Map<String,String> matches) throws IllegalArgumentException{

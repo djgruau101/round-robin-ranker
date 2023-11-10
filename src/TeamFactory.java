@@ -6,10 +6,10 @@ import java.util.HashMap;
  * no two teams have the same name.
  *
  * Attributes:
- * teamRegistry: a mapping between team names and their respective Team instances
+ * teamRegistry: a mapping between football team names and their respective Team instances
  *
- * teamRegistry is used to check whether an instance of a given name already exists
- * before creating a new instance.
+ * teamRegistry stores Team instances created by the TeamFactory class and is used
+ * to check whether an instance of a given name already exists before creating a new instance.
  *
  * Usage:
  * The TeamFactory class provides functionality for creating new Team instances via the
@@ -31,12 +31,26 @@ import java.util.HashMap;
  */
 public class TeamFactory {
 
+    /**
+     * The keys are the names of the teams for which a Team instance is created.
+     * Each team name maps to a Team instance with the given name.
+     */
     private Map<String, Team> teamRegistry;
 
     public TeamFactory() {
         this.teamRegistry = new HashMap<>();
     }
 
+    /**
+     * Creates an instance of the Team class if teamRegistry does not contain the given team name,
+     * and sets its matches to an empty map.
+     * Otherwise, return the Team instance from teamRegistry that has the given team name.
+     *
+     * This method ensures uniqueness of all Team instances, that is, all instances have different names.
+     *
+     * @param name A team name.
+     * @return A Team instance.
+     */
     public Team createTeam(String name) {
         if (teamRegistry.containsKey(name)) {
             // If a team with the same name already exists, return it
@@ -49,6 +63,17 @@ public class TeamFactory {
         }
     }
 
+    /**
+     * Creates an instance of the Team class if teamRegistry does not contain the given team name,
+     * and sets its matches to the given 'matches' map.
+     * Otherwise, return the Team instance from teamRegistry that has the given team name.
+     *
+     * This method ensures uniqueness of all Team instances, that is, all instances have different names.
+     *
+     * @param name A team name.
+     * @param matches A string->string map that represents the matches the team has played.
+     * @return A Team instance.
+     */
     public Team createTeam(String name, Map<String,String> matches) {
         if (teamRegistry.containsKey(name)) {
             // If a team with the same name already exists, return it
