@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  *
  * Attributes:
  * name: the name of the team
- * matches: a string to string map representing the matches it played
+ * matches: a string->string map representing the matches it played
  *
  * The keys of the 'matches' map represent the team's rivals' names.
  * Its values represent the corresponding scores against a team.
@@ -53,13 +53,13 @@ public class Team {
      *
      * @param opponent The name of a team that the team is playing or has played against.
      * @param score The score of the match against said team.
-     *              It consists of two positive integers separated by a '-'.
+     *              It consists of two nonnegative integers separated by a '-'.
      *              Its format is "goalsByThisTeam-goalsByRivalTeam".
      * @throws IllegalArgumentException If 'score' is not in the format indicated above.
      */
     public void addMatch(String opponent, String score) throws IllegalArgumentException {
         if (isScoreInvalid(score)) {
-            throw new IllegalArgumentException("The score must be two positive integers separated by '-'.");
+            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
         }
         this.matches.put(opponent, score);
     }
@@ -78,7 +78,7 @@ public class Team {
      * Gets the current value of 'matches'.
      * It represents the data for matches that the team has played.
      * Each match is represented by a key-value pair,
-     * the key being an opponent's team name and the value being the final score between the two teams.
+     * the key being an opponent's team name and the value being the score between the two teams.
      *
      * @return The current value of 'matches'.
      */
@@ -87,8 +87,8 @@ public class Team {
     }
 
     /**
-     * Takes a string representing the score of a match and returns whether its format is correct.
-     * Its format must be as follows: two nonnegative integers separated by a '-'.
+     * Takes a string representing the score of a match and returns whether its format is incorrect.
+     * A correctly formatted score consists of two nonnegative integers separated by a '-'.
      *
      * @param score The score of a match played by the team.
      * @return true if the score is incorrectly formatted, false otherwise.
@@ -101,18 +101,16 @@ public class Team {
     }
 
     /**
-     * Creates an instance of type Team and sets its matches to the matches input.
+     * Creates an instance of type Team and sets its matches according to the 'matches' input.
      * This method will be called by the TeamFactory class to ensure uniqueness of all Team instances.
      *
      * @param name The name of the instance.
-     * @param matches A string to string map that represents the matches played
-     *                It consists of two positive integers separated by a '-'.
-     *                The integers are the number of goals scored by the team and its opponent, respectively.
-     * @throws IllegalArgumentException If 'score' is not in the format indicated above.
+     * @param matches A string->string map that represents the matches played.
+     * @throws IllegalArgumentException If at least one score is incorrectly formatted.
      */
-    public static Team createInstance(String name, Map<String,String> matches) {
+    public static Team createInstance(String name, Map<String,String> matches) throws IllegalArgumentException{
         if (matches.values().parallelStream().anyMatch(Team::isScoreInvalid)) {
-            throw new IllegalArgumentException("The score must be two positive integers separated by '-'.");
+            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
         }
         return new Team(name, matches);
     }
