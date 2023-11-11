@@ -1,12 +1,13 @@
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * The TeamFactory class manages the creation of unique Team instances, that is,
  * no two teams have the same name.
  *
  * Attributes:
- * teamRegistry: a mapping between football team names and their respective Team instances
+ * teamRegistry: a map between football team names and their respective Team instances.
  *
  * teamRegistry stores Team instances created by the TeamFactory class and is used
  * to check whether an instance of a given name already exists before creating a new instance.
@@ -35,7 +36,7 @@ public class TeamFactory {
      * The keys are the names of the teams for which a Team instance is created.
      * Each team name maps to a Team instance with the given name.
      */
-    private Map<String, Team> teamRegistry;
+    private Map<String,Team> teamRegistry;
 
     public TeamFactory() {
         this.teamRegistry = new HashMap<>();
@@ -43,7 +44,30 @@ public class TeamFactory {
 
     /**
      * Creates an instance of the Team class if teamRegistry does not contain the given team name,
-     * and sets its matches to an empty map.
+     * and sets its matches to the given 'matches' set.
+     * Otherwise, return the Team instance from teamRegistry that has the given team name.
+     *
+     * This method ensures uniqueness of all Team instances, that is, all instances have different names.
+     *
+     * @param name A team name.
+     * @param matches A set containing the matches the team has played.
+     * @return A Team instance.
+     */
+    public Team createTeam(String name, Set<Team.Match> matches) {
+        if (teamRegistry.containsKey(name)) {
+            // If a team with the same name already exists, return it
+            return teamRegistry.get(name);
+        } else {
+            // Otherwise, create a new team, register it, and return
+            Team newTeam = Team.createInstance(name, matches);
+            teamRegistry.put(name, newTeam);
+            return newTeam;
+        }
+    }
+
+    /**
+     * Creates an instance of the Team class if teamRegistry does not contain the given team name,
+     * and sets its matches to an empty set.
      * Otherwise, return the Team instance from teamRegistry that has the given team name.
      *
      * This method ensures uniqueness of all Team instances, that is, all instances have different names.
@@ -58,29 +82,6 @@ public class TeamFactory {
         } else {
             // Otherwise, create a new team, register it, and return
             Team newTeam = Team.createInstance(name); // We don't need to care about matches
-            teamRegistry.put(name, newTeam);
-            return newTeam;
-        }
-    }
-
-    /**
-     * Creates an instance of the Team class if teamRegistry does not contain the given team name,
-     * and sets its matches to the given 'matches' map.
-     * Otherwise, return the Team instance from teamRegistry that has the given team name.
-     *
-     * This method ensures uniqueness of all Team instances, that is, all instances have different names.
-     *
-     * @param name A team name.
-     * @param matches A string->string map that represents the matches the team has played.
-     * @return A Team instance.
-     */
-    public Team createTeam(String name, Map<String,String> matches) {
-        if (teamRegistry.containsKey(name)) {
-            // If a team with the same name already exists, return it
-            return teamRegistry.get(name);
-        } else {
-            // Otherwise, create a new team, register it, and return
-            Team newTeam = Team.createInstance(name, matches);
             teamRegistry.put(name, newTeam);
             return newTeam;
         }
