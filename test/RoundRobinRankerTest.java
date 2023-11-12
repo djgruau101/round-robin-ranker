@@ -130,19 +130,42 @@ public class RoundRobinRankerTest {
     public void testAddMatch2() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
-        germany.addMatch("Costa Rica", "4-2");
+        germany.addMatch(new Team.Match("Costa Rica", "4-2"));
         assertEquals(Set.of(
                 new Team.Match("Japan", "1-2"),
                 new Team.Match("Costa Rica", "4-2")), germany.getMatches());
     }
 
     @Test
-    public void testAddMatchUpdateScore() {
+    public void testAddMatchUpdateScore1() {
         TeamFactory factory = new TeamFactory();
         // Update the results of an existing match
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
         germany.addMatch("Japan", "1-4");
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany.getMatches());
+    }
+
+    @Test
+    public void testAddMatchUpdateScore2() {
+        TeamFactory factory = new TeamFactory();
+        // Update the results of an existing match
+        Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
+        germany.addMatch(new Team.Match("Japan", "1-4"));
+        assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany.getMatches());
+    }
+
+    @Test
+    public void testAddMultipleMatches() {
+        TeamFactory factory = new TeamFactory();
+        Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
+        germany.addMatches(
+                new Team.Match("Japan", "1-4"),
+                new Team.Match("Spain", "1-1"),
+                new Team.Match("Costa Rica", "4-2")
+                );
+        assertEquals(Set.of(new Team.Match("Japan", "1-4"),
+                new Team.Match("Spain", "1-1"),
+                new Team.Match("Costa Rica", "4-2")), germany.getMatches());
     }
 
     @Test
@@ -248,7 +271,17 @@ public class RoundRobinRankerTest {
     }
 
     @Test
-    public void testTeamNameInMatchesAddMatch() {
+    public void testTeamNameInMatchesAddMatch1() {
+        TeamFactory factory = new TeamFactory();
+        Team germany = factory.createTeam("Germany");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            germany.addMatch(new Team.Match("Germany", "2-3"));
+        });
+        assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
+    }
+
+    @Test
+    public void testTeamNameInMatchesAddMatch2() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {

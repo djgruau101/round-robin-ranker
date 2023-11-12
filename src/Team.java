@@ -1,3 +1,5 @@
+import com.sun.jdi.connect.Connector;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,24 +64,56 @@ public class Team {
     /**
      * Adds a match played by the team or updates the score of an existing match.
      *
-     * @param opponentName The name of a team that the team is playing or has played against.
+     * @param match A football match.
+     * @throws IllegalArgumentException If the match's score is not expressed in the following format:
+     *                                  two nonnegative integers separated by a '-',
+     *                                  or 'opponentName' is equal to the team's name.
+     */
+    public void addMatch(Match match) throws IllegalArgumentException {
+        scoreInvalid = Match.isScoreInvalid(match.getScore());
+        isPlayingAgainstItself = match.getOpponentName().equals(this.getName());
+        throwExceptionMessage();
+        if (this.getMatches().parallelStream().anyMatch(m -> m.getOpponentName().equals(match.getOpponentName()))) {
+            this.matches.stream()
+                    .filter(m -> m.getOpponentName().equals(match.getOpponentName()))
+                    .forEach(m -> m.setScore(match.getScore())); // update score of existing match
+        } else {
+            this.matches.add(new Match(match.getOpponentName(), match.getScore()));
+        }
+    }
+
+    /**
+     * Constructs a Match instance, adds it in the team's matches
+     * or updates the score of one of the team's existing matches.
+     *
+     * @param opponentName The name of a team that the team has played against.
      * @param score The score of the match against said team.
      *              It consists of two nonnegative integers separated by a '-'.
      *              Its format is "goalsByThisTeam-goalsByRivalTeam".
      * @throws IllegalArgumentException If 'score' is not in the format indicated above
-     *                                  or 'opponentName' is equal to the team name.
+     *                                  or 'opponentName' is equal to the team's name.
      */
     public void addMatch(String opponentName, String score) throws IllegalArgumentException {
         scoreInvalid = Match.isScoreInvalid(score);
         isPlayingAgainstItself = opponentName.equals(this.getName());
         throwExceptionMessage();
-        if (this.getMatches().parallelStream().anyMatch(match -> match.getOpponentName().equals(opponentName))) {
-            this.matches.stream()
-                    .filter(match -> match.getOpponentName().equals(opponentName))
-                    .forEach(match -> match.setScore(score)); // update score of existing match
-        } else {
-            this.matches.add(new Match(opponentName, score));
-        }
+        addMatch(new Match(opponentName, score));
+    }
+
+    /**
+     * Adds matches played by the team and updates the score of existing matches.
+     *
+     * @param matches The matches that the team has played.
+     * @throws IllegalArgumentException If at least one score is not in the correct format:
+     *                                  two nonnegative integers separated by a '-',
+     *                                  or at least one match's opponent's name is equal to the team's name.
+     */
+    public void addMatches(Match... matches) throws IllegalArgumentException {
+        scoreInvalid = Arrays.stream(matches).map(Match::getScore).anyMatch(Match::isScoreInvalid);
+        isPlayingAgainstItself = Arrays.stream(matches).map(Match::getOpponentName)
+                .anyMatch(n -> n.equals(this.getName()));
+        throwExceptionMessage();
+        Arrays.stream(matches).forEach(this::addMatch);
     }
 
     /**
@@ -135,11 +169,13 @@ public class Team {
      * played against Real Madrid, where the team scored 3 goals and Real Madrid scored 1 goal.
      */
     static class Match {
+
         private final String opponentName;
         private String score;
 
         public Match(String opponentName, String score) throws IllegalArgumentException {
             scoreInvalid = isScoreInvalid(score);
+
             throwExceptionMessage();
             this.opponentName = opponentName;
             this.score = score;
