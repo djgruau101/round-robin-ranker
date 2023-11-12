@@ -259,6 +259,140 @@ public class RoundRobinRankerTest {
         assertEquals(6, argentina.getPoints());
     }
 
+    // testing calculations of number of wins, losses, draws, GF, GA, GD
+
+    @Test
+    public void testNumberMatchesWon() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina");
+        argentina.addMatches(
+                new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0"),
+                new Team.Match("Poland", "2-0"));
+        assertEquals(2, argentina.getNumberWins());
+    }
+
+    @Test
+    public void testNumberMatchesDrawn() {
+        TeamFactory factory = new TeamFactory();
+        Team poland = factory.createTeam("Poland");
+        poland.addMatches(
+                new Team.Match("Saudi Arabia", "2-0"),
+                new Team.Match("Mexico", "0-0"),
+                new Team.Match("Argentina", "0-2"));
+        assertEquals(1, poland.getNumberDraws());
+    }
+
+    @Test
+    public void testNumberMatchesLost() {
+        TeamFactory factory = new TeamFactory();
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        saudiArabia.addMatches(
+                new Team.Match("Argentina", "2-1"),
+                new Team.Match("Mexico", "1-2"),
+                new Team.Match("Poland", "0-2"));
+        assertEquals(2, saudiArabia.getNumberLosses());
+    }
+
+    @Test
+    public void testGDIntegerPositive() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina");
+        argentina.addMatches(
+                new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0"),
+                new Team.Match("Poland", "2-0"));
+        assertEquals(3, argentina.getGoalDifference());
+    }
+
+    @Test
+    public void testGDIntegerZero() {
+        TeamFactory factory = new TeamFactory();
+        Team poland = factory.createTeam("Poland");
+        poland.addMatches(
+                new Team.Match("Saudi Arabia", "2-0"),
+                new Team.Match("Mexico", "0-0"),
+                new Team.Match("Argentina", "0-2"));
+        assertEquals(0, poland.getGoalDifference());
+    }
+
+    @Test
+    public void testGDIntegerNegative() {
+        TeamFactory factory = new TeamFactory();
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        saudiArabia.addMatches(
+                new Team.Match("Argentina", "2-1"),
+                new Team.Match("Mexico", "1-2"),
+                new Team.Match("Poland", "0-2"));
+        assertEquals(-2, saudiArabia.getGoalDifference());
+    }
+
+    @Test
+    public void testGDStringPositive() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina");
+        argentina.addMatches(
+                new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0"),
+                new Team.Match("Poland", "2-0"));
+        assertEquals("+3", argentina.getGoalDifferenceToString());
+    }
+
+    @Test
+    public void testGDStringZero() {
+        TeamFactory factory = new TeamFactory();
+        Team poland = factory.createTeam("Poland");
+        poland.addMatches(
+                new Team.Match("Saudi Arabia", "2-0"),
+                new Team.Match("Mexico", "0-0"),
+                new Team.Match("Argentina", "0-2"));
+        assertEquals("0", poland.getGoalDifferenceToString());
+    }
+
+    @Test
+    public void testGDStringNegative() {
+        TeamFactory factory = new TeamFactory();
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        saudiArabia.addMatches(
+                new Team.Match("Argentina", "2-1"),
+                new Team.Match("Mexico", "1-2"),
+                new Team.Match("Poland", "0-2"));
+        assertEquals("-2", saudiArabia.getGoalDifferenceToString());
+    }
+
+    @Test
+    public void testGF() {
+        TeamFactory factory = new TeamFactory();
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        saudiArabia.addMatches(
+                new Team.Match("Argentina", "2-1"),
+                new Team.Match("Mexico", "1-2"),
+                new Team.Match("Poland", "0-2"));
+        assertEquals(3, saudiArabia.getGoalsFor());
+    }
+
+    @Test
+    public void testGA() {
+        TeamFactory factory = new TeamFactory();
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        saudiArabia.addMatches(
+                new Team.Match("Argentina", "2-1"),
+                new Team.Match("Mexico", "1-2"),
+                new Team.Match("Poland", "0-2"));
+        assertEquals(5, saudiArabia.getGoalsAgainst());
+    }
+
+    @Test
+    public void testNumberOfMatchesPlayed() {
+        TeamFactory factory = new TeamFactory();
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        saudiArabia.addMatches(
+                new Team.Match("Argentina", "2-1"),
+                new Team.Match("Mexico", "1-2"),
+                new Team.Match("Poland", "0-2"));
+        assertEquals(3, saudiArabia.getNumberOfMatchesPlayed());
+    }
+
     // testing instantiation of team with match containing the team's name
 
     @Test

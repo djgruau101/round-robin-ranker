@@ -1,6 +1,7 @@
-import com.sun.jdi.connect.Connector;
-
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,16 +50,6 @@ public class Team {
     private Team(String name) {
         this.name = name;
         this.matches = new HashSet<>();
-    }
-
-    private static void throwExceptionMessage() {
-        if (scoreInvalid && isPlayingAgainstItself) {
-            throw new IllegalArgumentException(compoundErrorMessage);
-        } if (scoreInvalid) {
-            throw new IllegalArgumentException(scoreInvalidMessage);
-        } if (isPlayingAgainstItself) {
-            throw new IllegalArgumentException(isPlayingAgainstItselfMessage);
-        }
     }
 
     /**
@@ -127,6 +118,36 @@ public class Team {
     }
 
     /**
+     * Returns the number of matches the team has won.
+     *
+     * @return Number of won matches.
+     */
+    public int getNumberWins() {
+        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
+                .filter(o -> o.equals(Match.Outcome.WIN)).count();
+    }
+
+    /**
+     * Returns the number of matches the team has drawn.
+     *
+     * @return Number of drawn matches.
+     */
+    public int getNumberDraws() {
+        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
+                .filter(o -> o.equals(Match.Outcome.DRAW)).count();
+    }
+
+    /**
+     * Returns the number of matches the team has lost.
+     *
+     * @return Number of lost matches.
+     */
+    public int getNumberLosses() {
+        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
+                .filter(o -> o.equals(Match.Outcome.LOSS)).count();
+    }
+
+    /**
      * Calculates the team's number of points in a round-robin tournament based on its matches' outcome.
      * A loss is 0 point, a draw is 1 point and a win is 3 points.
      *
@@ -139,7 +160,56 @@ public class Team {
     }
 
     /**
-     * Gets the set of matches that the team has played.
+     * Calculates the total number of goals scored by the team during the tournament, also known as 'goals for' (GF).
+     *
+     * @return The number of goals scored.
+     */
+    public int getGoalsFor() {
+        return this.matches.parallelStream().map(Match::getGoalsScored).mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * Calculates the total number of goals conceded by the team during the tournament, also known as 'goals against' (GA).
+     *
+     * @return The number of goals conceded.
+     */
+    public int getGoalsAgainst() {
+        return this.matches.parallelStream().map(Match::getGoalsConceded).mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * Calculates the team's goal difference (GD), which is goalsFor - goalsAgainst.
+     *
+     * @return The goal difference.
+     */
+    public int getGoalDifference() {
+        return this.getGoalsFor() - this.getGoalsAgainst();
+    }
+
+    /**
+     * Returns a string representation of the team's goal difference.
+     * It adds a '+' before the number if it is positive.
+     *
+     * @return The string representation of goal difference.
+     */
+    public String getGoalDifferenceToString() {
+        if (this.getGoalDifference() > 0) {
+            return "+" + this.getGoalDifference();
+        }
+        return Integer.toString(this.getGoalDifference());
+    }
+
+    /**
+     * Returns the number of matches the team has played.
+     *
+     * @return The number of matches played.
+     */
+    public int getNumberOfMatchesPlayed() {
+        return this.getMatches().size();
+    }
+
+    /**
+     * Returns the set of matches that the team has played.
      *
      * @return The set of matches that the team has played.
      */
@@ -148,7 +218,7 @@ public class Team {
     }
 
     /**
-     * Gets the name of the team.
+     * Returns the name of the team.
      *
      * @return The name of the team.
      */
@@ -190,7 +260,7 @@ public class Team {
          * That is, the team wins 0 point if they lose a match,
          * 1 point if the match is drawn and 3 points if they win a match.
          */
-        private enum Outcome {
+        enum Outcome {
 
             /**
              * The team lost the match.
@@ -233,18 +303,33 @@ public class Team {
         }
 
         /**
+         * Returns the number of goals scored by the team in this match.
+         *
+         * @return Number of goals scored.
+         */
+        public int getGoalsScored() {
+            return Integer.parseInt(this.score.split("-")[0]);
+        }
+
+        /**
+         * Returns the number of goals conceded by the team in this match.
+         *
+         * @return Number of goals conceded.
+         */
+        public int getGoalsConceded() {
+            return Integer.parseInt(this.score.split("-")[1]);
+        }
+
+        /**
          * Returns the team's outcome for the match depending
-         * on the number of goals scored by both teams.
+         * on the number of goals it scored and conceded.
          *
          * @return An enum that represents the result of the match.
          */
         public Outcome getOutcome() {
-            String[] scores = this.score.split("-");
-            int goalsByThisTeam = Integer.parseInt(scores[0]);
-            int goalsByOpponent = Integer.parseInt(scores[1]);
-            if (goalsByThisTeam < goalsByOpponent) {
+            if (this.getGoalsScored() < this.getGoalsConceded()) {
                 return Outcome.LOSS;
-            } else if (goalsByThisTeam == goalsByOpponent) {
+            } else if (this.getGoalsScored() == this.getGoalsConceded()) {
                 return Outcome.DRAW;
             }
             return Outcome.WIN;
@@ -306,6 +391,16 @@ public class Team {
      */
     public static Team createInstance(String name) {
         return new Team(name);
+    }
+
+    private static void throwExceptionMessage() {
+        if (scoreInvalid && isPlayingAgainstItself) {
+            throw new IllegalArgumentException(compoundErrorMessage);
+        } if (scoreInvalid) {
+            throw new IllegalArgumentException(scoreInvalidMessage);
+        } if (isPlayingAgainstItself) {
+            throw new IllegalArgumentException(isPlayingAgainstItselfMessage);
+        }
     }
 
     // will be set to private in production code
