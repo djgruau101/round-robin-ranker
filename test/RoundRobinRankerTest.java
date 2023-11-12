@@ -434,4 +434,34 @@ public class RoundRobinRankerTest {
         assertEquals("The score must be two nonnegative integers separated by '-', " +
                 "and all opponents' names should be different from the team's name.", exception.getMessage());
     }
+
+    // testing equality and compareTo
+
+    @Test
+    public void testTeamEquals() {
+        Team manCity1 = Team.createInstance("Manchester City");
+        manCity1.addMatches(
+                new Team.Match("Liverpool", "1-2"),
+                new Team.Match("Manchester United", "4-4"),
+                new Team.Match("Chelsea", "3-1"));
+        Team manCity2 = Team.createInstance("Manchester City",
+                Set.of(new Team.Match("Manchester United", "4-4")));
+        manCity2.addMatch("Chelsea", "3-1");
+        manCity2.addMatch(new Team.Match("Liverpool", "1-2"));
+        assertEquals(manCity2, manCity1);
+    }
+
+    @Test
+    public void testTeamNotEquals() {
+        Team manCity1 = Team.createInstance("Manchester City");
+        manCity1.addMatches(
+                new Team.Match("Liverpool", "1-2"),
+                new Team.Match("Manchester United", "4-4"),
+                new Team.Match("Chelsea", "3-1"));
+        Team manCity2 = Team.createInstance("Manchester City",
+                Set.of(new Team.Match("Manchester United", "4-2")));
+        manCity2.addMatch("Chelsea", "3-1");
+        manCity2.addMatch(new Team.Match("Liverpool", "1-2"));
+        assertNotEquals(manCity2, manCity1);
+    }
 }

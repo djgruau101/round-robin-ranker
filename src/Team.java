@@ -117,6 +117,8 @@ public class Team {
         this.matches.removeIf(match -> match.getOpponentName().equals(opponentName));
     }
 
+    // The following methods will be used to display data on a ranking table
+
     /**
      * Returns the number of matches the team has won.
      *
@@ -208,6 +210,13 @@ public class Team {
         return this.getMatches().size();
     }
 
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Team otherTeam = (Team) obj;
+        return this.name.equals(otherTeam.name) && this.matches.equals(otherTeam.matches);
+    }
+
     /**
      * Returns the set of matches that the team has played.
      *
@@ -273,7 +282,7 @@ public class Team {
             DRAW(1),
 
             /**
-             * The match won the match.
+             * The team won the match.
              */
             WIN(3);
 
@@ -389,10 +398,15 @@ public class Team {
      * @param name The name of the instance.
      * @return The new Team instance.
      */
-    public static Team createInstance(String name) {
+    static Team createInstance(String name) {
         return new Team(name);
     }
 
+    /**
+     * Throws an exception if either the user passed in an incorrectly formatted score
+     * (the correct format is two nonnegative integers separated by a '-'),
+     * or the opponentName of one Match instance equals the name of the Team instance that contains the Match instance.
+     */
     private static void throwExceptionMessage() {
         if (scoreInvalid && isPlayingAgainstItself) {
             throw new IllegalArgumentException(compoundErrorMessage);
