@@ -1,6 +1,4 @@
-import java.util.Collections;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,8 +55,8 @@ public class Team {
         if (Match.isScoreInvalid(score)) {
             throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
         }
-        if (this.matches.parallelStream().anyMatch(match -> match.getOpponentName().equals(opponentName))) {
-            matches.stream()
+        if (this.getMatches().parallelStream().anyMatch(match -> match.getOpponentName().equals(opponentName))) {
+            this.matches.stream()
                     .filter(match -> match.getOpponentName().equals(opponentName))
                     .forEach(match -> match.setScore(score)); // update score of existing match
         } else {
@@ -77,12 +75,15 @@ public class Team {
     }
 
     /**
-     * Calculates the team's number of points based on its matches.
+     * Calculates the team's number of points in a round-robin tournament based on its matches' outcome.
+     * A loss is 0 point, a draw is 1 point and a win is 3 points.
      *
      * @return The number of points the team has accumulated.
      */
     public int getPoints() {
-        return 0; // to be implemented
+        return this.getMatches().parallelStream().map(
+                match -> match.getOutcome().getPoints())
+                .mapToInt(Integer::intValue).sum();
     }
 
     /**
@@ -111,7 +112,7 @@ public class Team {
      * opponentName: the name of an opponent team.
      * score: the result of the match.
      *
-     * Each score is a string represented in the format "goalsByThisTeam-goalsByRivalTeam".
+     * Each score is a string represented in the format "goalsByThisTeam-goalsByOpponent".
      * For example, a match with arguments "Real Madrid" and "3-1" represents a match
      * played against Real Madrid, where the team scored 3 goals and Real Madrid scored 1 goal.
      */
@@ -127,8 +128,41 @@ public class Team {
             this.score = score;
         }
 
+        /**
+         * Represents the outcome of a match played by the team.
+         * The Outcome enum defines the possible states that a match can be in,
+         * such as LOSS, DRAW, or WIN.
+         *
+         * Each enum constant has its number of points associated to it.
+         * That is, the team wins 0 point if they lose a match,
+         * 1 point if the match is drawn and 3 points if they win a match.
+         */
         private enum Outcome {
-            LOSS, DRAW, WIN
+
+            /**
+             * The team lost the match.
+             */
+            LOSS(0),
+
+            /**
+             * The match ended in a tie.
+             */
+            DRAW(1),
+
+            /**
+             * The match won the match.
+             */
+            WIN(3);
+
+            private final int points;
+
+            Outcome(int points) {
+                this.points = points;
+            }
+
+            public int getPoints() {
+                return points;
+            }
         }
 
         public String getOpponentName() {
@@ -144,6 +178,24 @@ public class Team {
                 throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
             }
             this.score = score;
+        }
+
+        /**
+         * Returns the team's outcome for the match depending
+         * on the number of goals scored by both teams.
+         *
+         * @return An enum that represents the result of the match.
+         */
+        public Outcome getOutcome() {
+            String[] scores = this.score.split("-");
+            int goalsByThisTeam = Integer.parseInt(scores[0]);
+            int goalsByOpponent = Integer.parseInt(scores[1]);
+            if (goalsByThisTeam < goalsByOpponent) {
+                return Outcome.LOSS;
+            } else if (goalsByThisTeam == goalsByOpponent) {
+                return Outcome.DRAW;
+            }
+            return Outcome.WIN;
         }
 
         /**

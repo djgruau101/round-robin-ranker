@@ -159,8 +159,10 @@ public class RoundRobinRankerTest {
     public void testFactoryCreateTeam1() {
         // The matches stay the same
         TeamFactory factory = new TeamFactory();
-        Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
-        Team germany2 = factory.createTeam("Germany", Set.of(new Team.Match("Costa Rica", "4-2")));
+        Team germany = factory.createTeam("Germany",
+                Set.of(new Team.Match("Japan", "1-2")));
+        Team germany2 = factory.createTeam("Germany",
+                Set.of(new Team.Match("Costa Rica", "4-2")));
         assertEquals(Set.of(new Team.Match("Japan", "1-2")), germany.getMatches());
         assertEquals(Set.of(new Team.Match("Japan", "1-2")), germany2.getMatches());
     }
@@ -170,7 +172,8 @@ public class RoundRobinRankerTest {
         // The matches stay the same
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
-        Team germany2 = factory.createTeam("Germany", Set.of(new Team.Match("Costa Rica", "4-2")));
+        Team germany2 = factory.createTeam("Germany",
+                Set.of(new Team.Match("Costa Rica", "4-2")));
         assertEquals(Set.of(), germany.getMatches());
         assertEquals(Set.of(), germany2.getMatches());
     }
@@ -179,10 +182,47 @@ public class RoundRobinRankerTest {
     public void testMatchesSetMutability() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
-        Team germany2 = factory.createTeam("Germany", Set.of(new Team.Match("Costa Rica", "4-2")));
+        Team germany2 = factory.createTeam("Germany",
+                Set.of(new Team.Match("Costa Rica", "4-2")));
         germany.addMatch("Japan", "1-2"); // should apply for both germany and germany2
         germany2.addMatch("Japan", "1-4");
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany.getMatches());
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany2.getMatches());
+    }
+
+    // test calculation of points
+
+    @Test
+    public void testGetPointsAndAddMatch() {
+        // initialize instance with no matches, then add 3
+        TeamFactory factory = new TeamFactory();
+        Team germany = factory.createTeam("Germany");
+        germany.addMatch("Japan", "1-2");
+        germany.addMatch("Spain", "1-1");
+        germany.addMatch("Costa Rica", "4-2");
+        assertEquals(4, germany.getPoints());
+    }
+
+    @Test
+    public void testGetPointsAndMatchesConstructor() {
+        // initialize instance with 3 matches
+        TeamFactory factory = new TeamFactory();
+        Team croatia = factory.createTeam("Croatia", Set.of(
+                new Team.Match("Morocco", "0-0"),
+                new Team.Match("Canada", "4-1"),
+                new Team.Match("Belgium", "0-0")
+        ));
+        assertEquals(5, croatia.getPoints());
+    }
+
+    @Test
+    public void testGetPointsMixedConstructor() {
+        // initialize instance with 1 match, then add 2 matches
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina",
+                Set.of(new Team.Match("Saudi Arabia", "1-2")));
+        argentina.addMatch("Mexico", "2-0");
+        argentina.addMatch("Poland", "2-0");
+        assertEquals(6, argentina.getPoints());
     }
 }
