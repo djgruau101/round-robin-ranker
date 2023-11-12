@@ -31,6 +31,13 @@ public class Team {
 
     private final String name;
     private Set<Match> matches = new HashSet<>();
+    private static boolean scoreInvalid = false;
+    private static boolean isPlayingAgainstItself = false;
+    private static final String scoreInvalidMessage = "The score must be two nonnegative integers separated by '-'.";
+    private static final String isPlayingAgainstItselfMessage =
+            "All opponents' names should be different from the team's name.";
+    private static final String compoundErrorMessage = "The score must be two nonnegative integers separated by '-', " +
+            "and all opponents' names should be different from the team's name.";
 
     private Team(String name, Set<Match> matches) {
         this.name = name;
@@ -40,6 +47,16 @@ public class Team {
     private Team(String name) {
         this.name = name;
         this.matches = new HashSet<>();
+    }
+
+    private static void throwExceptionMessage() {
+        if (scoreInvalid && isPlayingAgainstItself) {
+            throw new IllegalArgumentException(compoundErrorMessage);
+        } if (scoreInvalid) {
+            throw new IllegalArgumentException(scoreInvalidMessage);
+        } if (isPlayingAgainstItself) {
+            throw new IllegalArgumentException(isPlayingAgainstItselfMessage);
+        }
     }
 
     /**
@@ -53,17 +70,9 @@ public class Team {
      *                                  or 'opponentName' is equal to the team name.
      */
     public void addMatch(String opponentName, String score) throws IllegalArgumentException {
-        boolean scoreInvalid = Match.isScoreInvalid(score);
-        boolean playAgainstItself = opponentName.equals(this.getName());
-        if (scoreInvalid && playAgainstItself) {
-            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-', " +
-                    "and all opponents' names should be different from the team's name.");
-        }
-        if (scoreInvalid) {
-            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
-        } if (playAgainstItself) {
-            throw new IllegalArgumentException("All opponents' names should be different from the team's name.");
-        }
+        scoreInvalid = Match.isScoreInvalid(score);
+        isPlayingAgainstItself = opponentName.equals(this.getName());
+        throwExceptionMessage();
         if (this.getMatches().parallelStream().anyMatch(match -> match.getOpponentName().equals(opponentName))) {
             this.matches.stream()
                     .filter(match -> match.getOpponentName().equals(opponentName))
@@ -130,9 +139,8 @@ public class Team {
         private String score;
 
         public Match(String opponentName, String score) throws IllegalArgumentException {
-            if (isScoreInvalid(score)) {
-                throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
-            }
+            scoreInvalid = isScoreInvalid(score);
+            throwExceptionMessage();
             this.opponentName = opponentName;
             this.score = score;
         }
@@ -183,9 +191,8 @@ public class Team {
         }
 
         public void setScore(String score) {
-            if (isScoreInvalid(score)) {
-                throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
-            }
+            scoreInvalid = isScoreInvalid(score);
+            throwExceptionMessage();
             this.score = score;
         }
 
@@ -248,17 +255,9 @@ public class Team {
      *                                  or at least one match's opponent name is identical to the team's name.
      */
     public static Team createInstance(String name, Set<Match> matches) throws IllegalArgumentException{
-        boolean scoreInvalid = matches.parallelStream().map(Match::getScore).anyMatch(Match::isScoreInvalid);
-        boolean playAgainstItself = matches.parallelStream().map(Match::getOpponentName).anyMatch(n -> n.equals(name));
-        if (scoreInvalid && playAgainstItself) {
-            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-', " +
-                    "and all opponents' names should be different from the team's name.");
-        }
-        if (scoreInvalid) {
-            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
-        } if (playAgainstItself) {
-            throw new IllegalArgumentException("All opponents' names should be different from the team's name.");
-        }
+        scoreInvalid = matches.parallelStream().map(Match::getScore).anyMatch(Match::isScoreInvalid);
+        isPlayingAgainstItself = matches.parallelStream().map(Match::getOpponentName).anyMatch(n -> n.equals(name));
+        throwExceptionMessage();
         return new Team(name, matches);
     }
 
@@ -271,5 +270,11 @@ public class Team {
      */
     public static Team createInstance(String name) {
         return new Team(name);
+    }
+
+    // will be set to private in production code
+    static void resetStaticState() {
+        scoreInvalid = false;
+        isPlayingAgainstItself = false;
     }
 }

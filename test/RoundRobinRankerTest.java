@@ -1,8 +1,20 @@
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Set;
 
 public class RoundRobinRankerTest {
+
+    @BeforeEach
+    public void setUp() {
+        Team.resetStaticState();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        Team.resetStaticState();
+    }
 
     @Test
     public void testGetMatchesEmpty() {
@@ -37,15 +49,15 @@ public class RoundRobinRankerTest {
     @Test
     public void testZeroWin() {
         TeamFactory factory = new TeamFactory();
-        Team germany = factory.createTeam("Mexico", Set.of(new Team.Match("Germany", "1-0")));
-        assertEquals(Set.of(new Team.Match("Germany", "1-0")), germany.getMatches());
+        Team mexico = factory.createTeam("Mexico", Set.of(new Team.Match("Germany", "1-0")));
+        assertEquals(Set.of(new Team.Match("Germany", "1-0")), mexico.getMatches());
     }
 
     @Test
     public void testBigIntegers() {
         TeamFactory factory = new TeamFactory();
-        Team germany = factory.createTeam("Mexico", Set.of(new Team.Match("Germany", "100-10")));
-        assertEquals(Set.of(new Team.Match("Germany", "100-10")), germany.getMatches());
+        Team mexico = factory.createTeam("Mexico", Set.of(new Team.Match("Germany", "100-10")));
+        assertEquals(Set.of(new Team.Match("Germany", "100-10")), mexico.getMatches());
     }
 
     @Test
