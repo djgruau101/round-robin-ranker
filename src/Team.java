@@ -49,11 +49,20 @@ public class Team {
      * @param score The score of the match against said team.
      *              It consists of two nonnegative integers separated by a '-'.
      *              Its format is "goalsByThisTeam-goalsByRivalTeam".
-     * @throws IllegalArgumentException If 'score' is not in the format indicated above.
+     * @throws IllegalArgumentException If 'score' is not in the format indicated above
+     *                                  or 'opponentName' is equal to the team name.
      */
     public void addMatch(String opponentName, String score) throws IllegalArgumentException {
-        if (Match.isScoreInvalid(score)) {
+        boolean scoreInvalid = Match.isScoreInvalid(score);
+        boolean playAgainstItself = opponentName.equals(this.getName());
+        if (scoreInvalid && playAgainstItself) {
+            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-', " +
+                    "and all opponents' names should be different from the team's name.");
+        }
+        if (scoreInvalid) {
             throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
+        } if (playAgainstItself) {
+            throw new IllegalArgumentException("All opponents' names should be different from the team's name.");
         }
         if (this.getMatches().parallelStream().anyMatch(match -> match.getOpponentName().equals(opponentName))) {
             this.matches.stream()
@@ -235,11 +244,20 @@ public class Team {
      * @param name The name of the instance.
      * @param matches The set of matches that the team has played.
      * @return A new Team instance with its name and matches correctly set.
-     * @throws IllegalArgumentException If at least one score from the matches is incorrectly formatted.
+     * @throws IllegalArgumentException If at least one score from the matches is incorrectly formatted
+     *                                  or at least one match's opponent name is identical to the team's name.
      */
     public static Team createInstance(String name, Set<Match> matches) throws IllegalArgumentException{
-        if (matches.parallelStream().map(Match::getScore).anyMatch(Match::isScoreInvalid)) {
+        boolean scoreInvalid = matches.parallelStream().map(Match::getScore).anyMatch(Match::isScoreInvalid);
+        boolean playAgainstItself = matches.parallelStream().map(Match::getOpponentName).anyMatch(n -> n.equals(name));
+        if (scoreInvalid && playAgainstItself) {
+            throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-', " +
+                    "and all opponents' names should be different from the team's name.");
+        }
+        if (scoreInvalid) {
             throw new IllegalArgumentException("The score must be two nonnegative integers separated by '-'.");
+        } if (playAgainstItself) {
+            throw new IllegalArgumentException("All opponents' names should be different from the team's name.");
         }
         return new Team(name, matches);
     }

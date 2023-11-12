@@ -106,7 +106,6 @@ public class RoundRobinRankerTest {
 
     @Test
     public void testAddMatch1() {
-        // Add a match
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
         germany.addMatch("Spain", "1-1");
@@ -117,7 +116,6 @@ public class RoundRobinRankerTest {
 
     @Test
     public void testAddMatch2() {
-        // Add a match
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
         germany.addMatch("Costa Rica", "4-2");
@@ -190,7 +188,7 @@ public class RoundRobinRankerTest {
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany2.getMatches());
     }
 
-    // test calculation of points
+    // testing calculation of points
 
     @Test
     public void testGetPointsAndAddMatch() {
@@ -224,5 +222,37 @@ public class RoundRobinRankerTest {
         argentina.addMatch("Mexico", "2-0");
         argentina.addMatch("Poland", "2-0");
         assertEquals(6, argentina.getPoints());
+    }
+
+    // testing instantiation of team with match containing the team's name
+
+    @Test
+    public void testTeamNameInMatchesInstantiation() {
+        TeamFactory factory = new TeamFactory();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            factory.createTeam("Argentina", Set.of(new Team.Match("Argentina", "1-2")));
+        });
+        assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
+    }
+
+    @Test
+    public void testTeamNameInMatchesAddMatch() {
+        TeamFactory factory = new TeamFactory();
+        Team germany = factory.createTeam("Germany");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            germany.addMatch("Germany", "2-3");
+        });
+        assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
+    }
+
+    @Test
+    public void testMultipleErrors() {
+        TeamFactory factory = new TeamFactory();
+        Team germany = factory.createTeam("Germany");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            germany.addMatch("Germany", "2- 3");
+        });
+        assertEquals("The score must be two nonnegative integers separated by '-', " +
+                "and all opponents' names should be different from the team's name.", exception.getMessage());
     }
 }
