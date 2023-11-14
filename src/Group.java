@@ -167,6 +167,12 @@ public abstract class Group {
         // return Arrays.asList(teams).indexOf(getTeamByName(teamName)) + 1; // still incorrect if Premier League teams are tied
     }
 
+    /**
+     * Returns whether the group is complete, that is,
+     * every team has faced each other (twice for double-legged format).
+     *
+     * @return true if the group is complete, false otherwise.
+     */
     public boolean isComplete() {
         return Arrays.stream(teams).map(Team::getNumberOfMatchesPlayed)
                 .allMatch(n -> n == (teams.length-1)*numberOfLegs);
