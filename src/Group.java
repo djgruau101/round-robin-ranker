@@ -186,7 +186,6 @@ public abstract class Group {
     public int getTeamPositionByName(String teamName) throws IllegalArgumentException {
         sortTeams();
         return teamByPosition.get(getTeamByName(teamName));
-        // return Arrays.asList(teams).indexOf(getTeamByName(teamName)) + 1; // still incorrect if Premier League teams are tied
     }
 
     /**
