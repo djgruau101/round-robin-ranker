@@ -631,4 +631,93 @@ public class RoundRobinRankerTest {
                 new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
         assertFalse(pl.isComplete());
     }
+
+    @Test
+    public void testGroupRemoveMatchOneLeg() {
+        Group groupC2022 = groupC2022Complete();
+        groupC2022.removeMatch("Argentina", "Poland");
+        groupC2022.removeMatch("Mexico", "Saudi Arabia");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Poland", "0-2"),
+                new Team.Match("Argentina", "2-1")),
+                groupC2022.getTeamByName("Saudi Arabia").getMatches());
+        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
+                new Team.Match("Saudi Arabia", "2-0")),
+                groupC2022.getTeamByName("Poland").getMatches());
+        assertEquals(Set.of(new Team.Match("Poland", "0-0"),
+                new Team.Match("Argentina", "0-2")),
+                groupC2022.getTeamByName("Mexico").getMatches());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.removeMatch("Chelsea", "Manchester City");
+        assertEquals(Set.of(new Team.Match("Chelsea", "2-1")), manCity.getMatches());
+        assertEquals(Set.of(new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+        assertFalse(pl.isComplete());
+    }
+
+    @Test
+    public void testGroupRemoveMatchHomeEqualsAwayError() {
+        Group groupC2022 = groupC2022Complete();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.removeMatch("Argentina", "Argentina"));
+        assertEquals("The home team and away team cannot be the same.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTeamNotInGroupError() {
+        Group groupC2022 = groupC2022Complete();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.removeMatch("Argentina", "Australia"));
+        assertEquals("Team names must be among the ones in the group.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTwiceOneLeg() {
+        Group groupC2022 = groupC2022Complete();
+        groupC2022.removeMatch("Argentina", "Poland");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
+                new Team.Match("Saudi Arabia", "2-0")),
+                groupC2022.getTeamByName("Poland").getMatches());
+        groupC2022.removeMatch("Argentina", "Poland");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
+                new Team.Match("Saudi Arabia", "2-0")),
+                groupC2022.getTeamByName("Poland").getMatches());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTwiceTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team liverpool = factory.createTeam("Liverpool");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal, liverpool};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.removeMatch("Chelsea", "Manchester City");
+        assertEquals(Set.of(new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+        pl.removeMatch("Chelsea", "Liverpool");
+        assertEquals(Set.of(new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+    }
 }

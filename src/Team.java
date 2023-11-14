@@ -36,6 +36,7 @@ public class Team {
 
     private final String name;
     private Set<Match> matches = new HashSet<>();
+
     private static boolean scoreInvalid = false;
     private static boolean isPlayingAgainstItself = false;
     private static final String scoreInvalidMessage = "The score must be two nonnegative integers separated by '-'.";
@@ -119,10 +120,12 @@ public class Team {
         matches.removeIf(match -> match.getOpponentName().equals(opponentName));
     }
 
-    // The following methods will be used to display data on a ranking table
+    // The following methods will be used to display data on a ranking table.
+    // For double-legged tournaments, these will only take into account matches played at home.
 
     /**
      * Returns the number of matches the team has won.
+     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of won matches.
      */
@@ -133,6 +136,7 @@ public class Team {
 
     /**
      * Returns the number of matches the team has drawn.
+     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of drawn matches.
      */
@@ -143,6 +147,7 @@ public class Team {
 
     /**
      * Returns the number of matches the team has lost.
+     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of lost matches.
      */
@@ -152,8 +157,9 @@ public class Team {
     }
 
     /**
-     * Calculates the team's number of points in a round-robin tournament based on its matches' outcome.
+     * Returns the team's number of points in a round-robin tournament based on its matches' outcome.
      * A loss is 0 point, a draw is 1 point and a win is 3 points.
+     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return The number of points the team has accumulated.
      */

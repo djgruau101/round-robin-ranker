@@ -87,6 +87,28 @@ public abstract class Group {
         }
     }
 
+    public void removeMatch(String homeTeamName, String awayTeamName) throws IllegalArgumentException {
+        if (homeTeamName.equals(awayTeamName)) {
+            throw new IllegalArgumentException("The home team and away team cannot be the same.");
+        }
+        // check if both homeTeamName and awayTeamName correspond to teams in the group
+        Optional<Team> matchingHomeTeam = Arrays.stream(teams).filter(t ->
+                t.getName().equals(homeTeamName)).findFirst();
+        Optional<Team> matchingAwayTeam = Arrays.stream(teams).filter(t ->
+                t.getName().equals(awayTeamName)).findFirst();
+        if (matchingHomeTeam.isPresent() && matchingAwayTeam.isPresent()) {
+            Team homeTeam = matchingHomeTeam.get();
+            Team awayTeam = matchingAwayTeam.get();
+            homeTeam.removeMatchByOpponentName(awayTeamName);
+            if (numberOfLegs == 1) {
+                awayTeam.removeMatchByOpponentName(homeTeamName);
+            }
+            sortTeams();
+        } else {
+            throw new IllegalArgumentException("Team names must be among the ones in the group.");
+        }
+    }
+
     public Team getTeamByName(String teamName) throws IllegalArgumentException {
         Optional<Team> matchingTeam = Arrays.stream(teams).filter(t -> t.getName().equals(teamName)).findFirst();
         if (matchingTeam.isPresent()) {
@@ -175,6 +197,6 @@ public abstract class Group {
      */
     public boolean isComplete() {
         return Arrays.stream(teams).map(Team::getNumberOfMatchesPlayed)
-                .allMatch(n -> n == (teams.length-1)*numberOfLegs);
+                .allMatch(n -> n == teams.length-1);
     }
 }
