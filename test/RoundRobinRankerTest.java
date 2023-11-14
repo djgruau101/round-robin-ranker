@@ -63,54 +63,48 @@ public class RoundRobinRankerTest {
     @Test
     public void testInvalidScoreLeadingZero1() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Germany", Set.of(new Team.Match("Japan", "01-2")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "01-2"))));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testInvalidScoreLeadingZero2() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-02")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-02"))));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testInvalidScoreNonDigits() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2g")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2g"))));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testInvalidScoreNoHyphen1() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Germany", Set.of(new Team.Match("Japan", "0")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "0"))));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testInvalidScoreNoHyphen2() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Germany", Set.of(new Team.Match("Japan", "021")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "021"))));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testInvalidScoreSpace() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1- 2")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1- 2"))));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
@@ -398,9 +392,8 @@ public class RoundRobinRankerTest {
     @Test
     public void testTeamNameInMatchesInstantiation() {
         TeamFactory factory = new TeamFactory();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            factory.createTeam("Argentina", Set.of(new Team.Match("Argentina", "1-2")));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createTeam("Argentina", Set.of(new Team.Match("Argentina", "1-2"))));
         assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
     }
 
@@ -408,9 +401,8 @@ public class RoundRobinRankerTest {
     public void testTeamNameInMatchesAddMatch1() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            germany.addMatch(new Team.Match("Germany", "2-3"));
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> germany.addMatch(new Team.Match("Germany", "2-3")));
         assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
     }
 
@@ -418,9 +410,8 @@ public class RoundRobinRankerTest {
     public void testTeamNameInMatchesAddMatch2() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            germany.addMatch("Germany", "2-3");
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> germany.addMatch("Germany", "2-3"));
         assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
     }
 
@@ -428,14 +419,13 @@ public class RoundRobinRankerTest {
     public void testMultipleErrors() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            germany.addMatch("Germany", "2- 3");
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> germany.addMatch("Germany", "2- 3"));
         assertEquals("The score must be two nonnegative integers separated by '-', " +
                 "and all opponents' names should be different from the team's name.", exception.getMessage());
     }
 
-    // testing equality and compareTo
+    // testing equality between teams
 
     @Test
     public void testTeamEquals() {
@@ -463,5 +453,182 @@ public class RoundRobinRankerTest {
         manCity2.addMatch("Chelsea", "3-1");
         manCity2.addMatch(new Team.Match("Liverpool", "1-2"));
         assertNotEquals(manCity2, manCity1);
+    }
+
+    // testing group operations
+
+    /**
+     * Constructs a new FIFAWorldCupGroup that represents Group C from the 2022 FIFA World Cup.
+     * Its teams are Argentina, Saudi Arabia, Poland and Mexico.
+     *
+     * @return Group C of the 2022 FIFA World Cup
+     */
+    FIFAWorldCupGroup groupC2022() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina");
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        Team poland = factory.createTeam("Poland");
+        Team mexico = factory.createTeam("Mexico");
+        Team[] teams = new Team[]{argentina, saudiArabia, poland, mexico};
+        return new FIFAWorldCupGroup(teams);
+    }
+
+    /**
+     * Constructs a new FIFAWorldCupGroup that represents the
+     * actual results of Group C from the 2022 FIFA World Cup.
+     * Its teams are Argentina, Saudi Arabia, Poland and Mexico.
+     *
+     * @return Group C of the 2022 FIFA World Cup
+     */
+    FIFAWorldCupGroup groupC2022Complete() {
+        FIFAWorldCupGroup groupC2022 = groupC2022();
+        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
+        groupC2022.addMatch("Poland", "Mexico", "0-0");
+        groupC2022.addMatch("Poland", "Saudi Arabia", "2-0");
+        groupC2022.addMatch("Argentina", "Mexico", "2-0");
+        groupC2022.addMatch("Poland", "Argentina", "0-2");
+        groupC2022.addMatch("Saudi Arabia", "Mexico", "1-2");
+        return groupC2022;
+    }
+
+    @Test
+    public void testGroupAddMatchOneLeg() {
+        Group groupC2022 = groupC2022();
+        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Argentina", "2-1")),
+                groupC2022.getTeamByName("Saudi Arabia").getMatches());
+    }
+
+    @Test
+    public void testGroupAddMatchPlayingAgainstItself() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.addMatch("Argentina", "Argentina", "1-2"));
+        assertEquals("The home team and away team cannot be the same.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupAddMatchScoreInvalid() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.addMatch("Argentina", "Mexico", "2 -0"));
+        assertEquals("The score must be two nonnegative integers separated by '-'.\n", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupMultipleErrors() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.addMatch("Argentina", "Argentina", "2 -0"));
+        assertEquals("The score must be two nonnegative integers separated by '-'.\n" +
+                "The home team and away team cannot be the same.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupAddMatchTeamNameNotInGroup() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.addMatch("Argentina", "Australia", "2-1"));
+        assertEquals("Team names must be among the ones in the group.", exception.getMessage());
+    }
+
+    @Test
+    public void testTooManyTeamsInGroup() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina");
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        Team poland = factory.createTeam("Poland");
+        Team mexico = factory.createTeam("Mexico");
+        Team australia = factory.createTeam("Australia");
+        Team[] teams = new Team[]{argentina, saudiArabia, poland, mexico, australia};
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> new FIFAWorldCupGroup(teams));
+        assertEquals("The number of teams must not exceed 4.", exception.getMessage());
+    }
+
+    @Test
+    public void testGetTeamByNameAndEncapsulation() {
+        Group groupC2022 = groupC2022();
+        Team argentina = groupC2022.getTeamByName("Argentina");
+        TeamFactory factory = new TeamFactory();
+        assertEquals(factory.createTeam("Argentina", Set.of()), argentina);
+        // test defensive copying and encapsulation
+        argentina.addMatch("Australia", "2-1");
+        // the Argentina team instance in the group should not change
+        assertEquals(factory.createTeam("Argentina", Set.of()), groupC2022.getTeamByName("Argentina"));
+    }
+
+    @Test
+    public void testGetTeamByNameError() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.getTeamByName("Australia"));
+        assertEquals("No team of name Australia is in this group.", exception.getMessage());
+    }
+
+    @Test
+    public void testFIFARankingGDTie() {
+        Group groupC2022 = groupC2022Complete();
+        Team argentina = groupC2022.getTeamByName("Argentina");
+        Team poland = groupC2022.getTeamByName("Poland");
+        Team mexico = groupC2022.getTeamByName("Mexico");
+        Team saudiArabia = groupC2022.getTeamByName("Saudi Arabia");
+        // trying out both compareTeams methods
+        assertTrue(groupC2022.compareTeams(argentina, poland) > 0);
+        assertTrue(groupC2022.compareTeams("Argentina", "Mexico") > 0);
+        assertTrue(groupC2022.compareTeams(argentina, saudiArabia) > 0);
+        assertTrue(groupC2022.compareTeams("Poland", "Mexico") > 0);
+        assertTrue(groupC2022.compareTeams("Poland", "Saudi Arabia") > 0);
+        assertTrue(groupC2022.compareTeams(saudiArabia, mexico) < 0);
+    }
+
+    @Test
+    public void testFIFASortGroupPositions() {
+        Group groupC2022 = groupC2022Complete();
+        groupC2022.sortTeams();
+        assertEquals(1, groupC2022.getTeamPositionByName("Argentina"));
+        assertEquals(2, groupC2022.getTeamPositionByName("Poland"));
+        assertEquals(3, groupC2022.getTeamPositionByName("Mexico"));
+        assertEquals(4, groupC2022.getTeamPositionByName("Saudi Arabia"));
+    }
+
+    @Test
+    public void testFIFASortedGroupPositions() {
+        Group groupC2022 = groupC2022Complete();
+        Team argentina = groupC2022.getTeamByName("Argentina");
+        Team poland = groupC2022.getTeamByName("Poland");
+        Team mexico = groupC2022.getTeamByName("Mexico");
+        Team saudiArabia = groupC2022.getTeamByName("Saudi Arabia");
+        Team[] sortedTeams = groupC2022.sortedTeams();
+        assertEquals(argentina, sortedTeams[0]);
+        assertEquals(poland, sortedTeams[1]);
+        assertEquals(mexico, sortedTeams[2]);
+        assertEquals(saudiArabia, sortedTeams[3]);
+    }
+
+    @Test
+    public void testCompletenessOneLeg() {
+        Group groupC2022 = groupC2022Complete();
+        assertTrue(groupC2022.isComplete());
+    }
+
+    @Test
+    public void testGroupAddMatchTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        assertEquals(Set.of(new Team.Match("Chelsea", "2-1")), manCity.getMatches());
+        assertEquals(Set.of(
+                new Team.Match("Manchester City", "3-2"),
+                new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+        assertFalse(pl.isComplete());
     }
 }

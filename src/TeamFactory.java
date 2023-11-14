@@ -6,7 +6,7 @@ import java.util.Set;
  * The TeamFactory class manages the creation of unique Team instances, that is,
  * no two teams have the same name.
  *
- * Attributes:
+ * Attribute:
  * teamRegistry: a map between football team names and their respective Team instances.
  *
  * teamRegistry stores Team instances created by the TeamFactory class and is used
@@ -36,7 +36,7 @@ public class TeamFactory {
      * The keys are the names of the teams for which a Team instance is created.
      * Each team name maps to a Team instance with the given name.
      */
-    private Map<String,Team> teamRegistry;
+    private final Map<String,Team> teamRegistry;
 
     public TeamFactory() {
         this.teamRegistry = new HashMap<>();

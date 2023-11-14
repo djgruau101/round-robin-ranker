@@ -1,7 +1,8 @@
+import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
  * Attributes:
  * name: the name of the team.
  * matches: a set of matches, each of them specifying a rival team and the score.
+ *
  *
  * Usage:
  * The Team class provides functionality for adding and removing match data
@@ -64,12 +66,12 @@ public class Team {
         scoreInvalid = Match.isScoreInvalid(match.getScore());
         isPlayingAgainstItself = match.getOpponentName().equals(this.getName());
         throwExceptionMessage();
-        if (this.getMatches().parallelStream().anyMatch(m -> m.getOpponentName().equals(match.getOpponentName()))) {
-            this.matches.stream()
+        if (matches.parallelStream().anyMatch(m -> m.getOpponentName().equals(match.getOpponentName()))) {
+            matches.stream()
                     .filter(m -> m.getOpponentName().equals(match.getOpponentName()))
                     .forEach(m -> m.setScore(match.getScore())); // update score of existing match
         } else {
-            this.matches.add(new Match(match.getOpponentName(), match.getScore()));
+            matches.add(new Match(match.getOpponentName(), match.getScore()));
         }
     }
 
@@ -86,7 +88,7 @@ public class Team {
      */
     public void addMatch(String opponentName, String score) throws IllegalArgumentException {
         scoreInvalid = Match.isScoreInvalid(score);
-        isPlayingAgainstItself = opponentName.equals(this.getName());
+        isPlayingAgainstItself = opponentName.equals(name);
         throwExceptionMessage();
         addMatch(new Match(opponentName, score));
     }
@@ -102,7 +104,7 @@ public class Team {
     public void addMatches(Match... matches) throws IllegalArgumentException {
         scoreInvalid = Arrays.stream(matches).map(Match::getScore).anyMatch(Match::isScoreInvalid);
         isPlayingAgainstItself = Arrays.stream(matches).map(Match::getOpponentName)
-                .anyMatch(n -> n.equals(this.getName()));
+                .anyMatch(n -> n.equals(name));
         throwExceptionMessage();
         Arrays.stream(matches).forEach(this::addMatch);
     }
@@ -114,7 +116,7 @@ public class Team {
      * @param opponentName The name of a team that the team played against.
      */
     public void removeMatchByOpponentName(String opponentName) {
-        this.matches.removeIf(match -> match.getOpponentName().equals(opponentName));
+        matches.removeIf(match -> match.getOpponentName().equals(opponentName));
     }
 
     // The following methods will be used to display data on a ranking table
@@ -125,7 +127,7 @@ public class Team {
      * @return Number of won matches.
      */
     public int getNumberWins() {
-        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
+        return (int) matches.parallelStream().map(Match::getOutcome)
                 .filter(o -> o.equals(Match.Outcome.WIN)).count();
     }
 
@@ -135,7 +137,7 @@ public class Team {
      * @return Number of drawn matches.
      */
     public int getNumberDraws() {
-        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
+        return (int) matches.parallelStream().map(Match::getOutcome)
                 .filter(o -> o.equals(Match.Outcome.DRAW)).count();
     }
 
@@ -145,7 +147,7 @@ public class Team {
      * @return Number of lost matches.
      */
     public int getNumberLosses() {
-        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
+        return (int) matches.parallelStream().map(Match::getOutcome)
                 .filter(o -> o.equals(Match.Outcome.LOSS)).count();
     }
 
@@ -156,8 +158,7 @@ public class Team {
      * @return The number of points the team has accumulated.
      */
     public int getPoints() {
-        return this.getMatches().parallelStream().map(
-                match -> match.getOutcome().getPoints())
+        return matches.parallelStream().map(match -> match.getOutcome().getPoints())
                 .mapToInt(Integer::intValue).sum();
     }
 
@@ -167,7 +168,7 @@ public class Team {
      * @return The number of goals scored.
      */
     public int getGoalsFor() {
-        return this.matches.parallelStream().map(Match::getGoalsScored).mapToInt(Integer::intValue).sum();
+        return matches.parallelStream().map(Match::getGoalsScored).mapToInt(Integer::intValue).sum();
     }
 
     /**
@@ -176,7 +177,7 @@ public class Team {
      * @return The number of goals conceded.
      */
     public int getGoalsAgainst() {
-        return this.matches.parallelStream().map(Match::getGoalsConceded).mapToInt(Integer::intValue).sum();
+        return matches.parallelStream().map(Match::getGoalsConceded).mapToInt(Integer::intValue).sum();
     }
 
     /**
@@ -185,7 +186,7 @@ public class Team {
      * @return The goal difference.
      */
     public int getGoalDifference() {
-        return this.getGoalsFor() - this.getGoalsAgainst();
+        return getGoalsFor() - getGoalsAgainst();
     }
 
     /**
@@ -195,10 +196,10 @@ public class Team {
      * @return The string representation of goal difference.
      */
     public String getGoalDifferenceToString() {
-        if (this.getGoalDifference() > 0) {
-            return "+" + this.getGoalDifference();
+        if (getGoalDifference() > 0) {
+            return "+" + getGoalDifference();
         }
-        return Integer.toString(this.getGoalDifference());
+        return Integer.toString(getGoalDifference());
     }
 
     /**
@@ -207,14 +208,24 @@ public class Team {
      * @return The number of matches played.
      */
     public int getNumberOfMatchesPlayed() {
-        return this.getMatches().size();
+        return matches.size();
     }
 
+    /**
+     * Returns whether some other object is "equal to" this team object.
+     *
+     * @return The number of matches played.
+     */
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Team otherTeam = (Team) obj;
-        return this.name.equals(otherTeam.name) && this.matches.equals(otherTeam.matches);
+        return name.equals(otherTeam.name) && matches.equals(otherTeam.matches);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, matches);
     }
 
     /**
@@ -232,7 +243,7 @@ public class Team {
      * @return The name of the team.
      */
     public String getName() {
-        return this.name;
+        return name;
     }
 
     /**
@@ -254,7 +265,6 @@ public class Team {
 
         public Match(String opponentName, String score) throws IllegalArgumentException {
             scoreInvalid = isScoreInvalid(score);
-
             throwExceptionMessage();
             this.opponentName = opponentName;
             this.score = score;
@@ -298,11 +308,11 @@ public class Team {
         }
 
         public String getOpponentName() {
-            return this.opponentName;
+            return opponentName;
         }
 
         public String getScore() {
-            return this.score;
+            return score;
         }
 
         public void setScore(String score) {
@@ -317,7 +327,7 @@ public class Team {
          * @return Number of goals scored.
          */
         public int getGoalsScored() {
-            return Integer.parseInt(this.score.split("-")[0]);
+            return Integer.parseInt(score.split("-")[0]);
         }
 
         /**
@@ -326,7 +336,11 @@ public class Team {
          * @return Number of goals conceded.
          */
         public int getGoalsConceded() {
-            return Integer.parseInt(this.score.split("-")[1]);
+            return Integer.parseInt(score.split("-")[1]);
+        }
+
+        public String getReversedScore() {
+            return getGoalsConceded() +"-"+ getGoalsScored();
         }
 
         /**
@@ -336,9 +350,9 @@ public class Team {
          * @return An enum that represents the result of the match.
          */
         public Outcome getOutcome() {
-            if (this.getGoalsScored() < this.getGoalsConceded()) {
+            if (getGoalsScored() < getGoalsConceded()) {
                 return Outcome.LOSS;
-            } else if (this.getGoalsScored() == this.getGoalsConceded()) {
+            } else if (getGoalsScored() == getGoalsConceded()) {
                 return Outcome.DRAW;
             }
             return Outcome.WIN;
@@ -353,7 +367,7 @@ public class Team {
          * @param score The score of a match played by the team.
          * @return true if the score is incorrectly formatted, false otherwise.
          */
-        private static boolean isScoreInvalid(String score) {
+        static boolean isScoreInvalid(String score) {
             String pattern = "^(0|[1-9]\\d*)-(0|[1-9]\\d*)$"; // nonnegative integer, hyphen, nonnegative integer
             Pattern regex = Pattern.compile(pattern);
             Matcher matcher = regex.matcher(score);
@@ -370,7 +384,7 @@ public class Team {
 
         @Override
         public int hashCode() {
-            return opponentName.hashCode();
+            return Objects.hash(opponentName, score);
         }
     }
 
@@ -407,7 +421,7 @@ public class Team {
      * (the correct format is two nonnegative integers separated by a '-'),
      * or the opponentName of one Match instance equals the name of the Team instance that contains the Match instance.
      */
-    private static void throwExceptionMessage() {
+    static void throwExceptionMessage() {
         if (scoreInvalid && isPlayingAgainstItself) {
             throw new IllegalArgumentException(compoundErrorMessage);
         } if (scoreInvalid) {
