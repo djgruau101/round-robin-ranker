@@ -22,14 +22,6 @@ import java.util.stream.IntStream;
  * For groups where numberOfLegs = 2, each team's 'matches' field
  * will solely contain the team's games that are played at home.
  * The away goals rule may apply for tiebreaking purposes depending on the competition.
- *
- * Example usage:
- * ```
- * Group group = new FIFAWorldCupGroup(); // OneLegGroup denotes a group where each pair of teams face each other once only.
- * Team argentina = factory.createTeam("Argentina);
- * Team saudiArabia = factory.createTeam("Saudi Arabia");
- *
- * ```
  */
 public abstract class Group {
 

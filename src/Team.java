@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
  * name: the name of the team.
  * matches: a set of matches, each of them specifying a rival team and the score.
  *
- *
  * Usage:
  * The Team class provides functionality for adding and removing match data
  * by creating instances of the inner Match class.
@@ -23,6 +22,9 @@ import java.util.regex.Pattern;
  * which will be used to rank the team with its rivals.
  * Other data such as the number of matches played, number of wins, number of draws,
  * number of losses, goals scored, goals conceded, and goal difference will also be displayed in a table.
+ *
+ * IMPORTANT:
+ * If the team plays in a double-legged tournament,
  *
  * This class also contains two public overloaded static methods called createInstance, which will be
  * called by the TeamFactory class to ensure that all Team instances are unique.
