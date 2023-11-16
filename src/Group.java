@@ -40,61 +40,71 @@ public abstract class Group {
     }
 
     /**
-     * Adds a match played between a home team and an away team. Each team name must belong in the group.
-     * In one-legged group stages, the away team automatically gets a match added to its matches where its
-     * opponent is the home team and the input score is reversed.
+     * Adds a match played between two teams whose names are denoted team1Name and team2Name.
+     * Each team name must belong in the group.
+     * In single-legged tournaments, the match is added to both teams' homeMatches.
+     * In double-legged tournaments, the match is added to team1Name's homeMatches and team2Name's awayMatches.
      *
-     * @param homeTeamName The name of the home team.
-     * @param awayTeamName The name of the away team.
+     * @param team1Name The name of the first team. If the tournament is double-legged, this is the home team.
+     * @param team2Name The name of the second team. If the tournament is double-legged, this is the away team.
      * @throws IllegalArgumentException If at least one of the teams' name does not correspond to a team in the group,
      *                                  'opponentName' is equal to the team's name,
      *                                  or the match's score is not expressed in the following format:
      *                                  two nonnegative integers separated by a '-'.
      */
-    public void addMatch(String homeTeamName, String awayTeamName, String score) throws IllegalArgumentException {
+    public void addMatch(String team1Name, String team2Name, String score) throws IllegalArgumentException {
         String errorMessage = ""; // error message for scoreInvalid and/or isPlayingAgainstItself
         if (Team.Match.isScoreInvalid(score)) {
             errorMessage += "The score must be two nonnegative integers separated by '-'.\n";
-        } if (homeTeamName.equals(awayTeamName)) {
-            errorMessage += "The home team and away team cannot be the same.";
+        } if (team1Name.equals(team2Name)) {
+            errorMessage += "The names of the two teams facing each other cannot be the same.";
         } if (!errorMessage.isEmpty()) {
             throw new IllegalArgumentException(errorMessage);
         }
         // check if both homeTeamName and awayTeamName correspond to teams in the group
-        Optional<Team> matchingHomeTeam = Arrays.stream(teams).filter(t ->
-                t.getName().equals(homeTeamName)).findFirst();
-        Optional<Team> matchingAwayTeam = Arrays.stream(teams).filter(t ->
-                t.getName().equals(awayTeamName)).findFirst();
-        if (matchingHomeTeam.isPresent() && matchingAwayTeam.isPresent()) {
-            Team homeTeam = matchingHomeTeam.get();
-            Team awayTeam = matchingAwayTeam.get();
-            Team.Match newMatch = new Team.Match(awayTeamName, score);
-            homeTeam.addMatch(newMatch);
+        Optional<Team> matchingTeam1 = Arrays.stream(teams).filter(t ->
+                t.getName().equals(team1Name)).findFirst();
+        Optional<Team> matchingTeam2 = Arrays.stream(teams).filter(t ->
+                t.getName().equals(team2Name)).findFirst();
+        if (matchingTeam1.isPresent() && matchingTeam2.isPresent()) {
+            Team team1 = matchingTeam1.get();
+            Team team2 = matchingTeam2.get();
+            Team.Match newHomeMatch = new Team.Match(team2Name, score, false);
+            team1.addMatch(newHomeMatch);
+            // if there are two legs, the awayTeam gets the match added to its awayMatches
+            team2.addMatch(team1.getName(), newHomeMatch.getReversedScore(), numberOfLegs == 2);
             sortTeams(); // update the team positions
-            if (numberOfLegs == 1) {
-                awayTeam.addMatch(homeTeam.getName(), newMatch.getReversedScore()); // 1-2 becomes 2-1
-            }
         } else {
             throw new IllegalArgumentException("Team names must be among the ones in the group.");
         }
     }
 
-    public void removeMatch(String homeTeamName, String awayTeamName) throws IllegalArgumentException {
-        if (homeTeamName.equals(awayTeamName)) {
-            throw new IllegalArgumentException("The home team and away team cannot be the same.");
+    /**
+     * Removes a match played between two teams whose names are denoted team1Name and team2Name.
+     * Each team name must belong in the group.
+     *
+     * In single-legged tournaments, the match is removed from both teams' homeMatches.
+     * In double-legged tournaments, the match is removed from team1Name's homeMatches and team2Name's awayMatches.
+     *
+     * @param team1Name The name of the first team. If the tournament is double-legged, this is the home team.
+     * @param team2Name The name of the second team. If the tournament is double-legged, this is the away team.
+     * @throws IllegalArgumentException If at least one of the teams' name does not correspond to a team in the group,
+     *                                  or 'opponentName' is equal to the team's name.
+     */
+    public void removeMatch(String team1Name, String team2Name) throws IllegalArgumentException {
+        if (team1Name.equals(team2Name)) {
+            throw new IllegalArgumentException("The names of the two teams facing each other cannot be the same.");
         }
         // check if both homeTeamName and awayTeamName correspond to teams in the group
-        Optional<Team> matchingHomeTeam = Arrays.stream(teams).filter(t ->
-                t.getName().equals(homeTeamName)).findFirst();
-        Optional<Team> matchingAwayTeam = Arrays.stream(teams).filter(t ->
-                t.getName().equals(awayTeamName)).findFirst();
-        if (matchingHomeTeam.isPresent() && matchingAwayTeam.isPresent()) {
-            Team homeTeam = matchingHomeTeam.get();
-            Team awayTeam = matchingAwayTeam.get();
-            homeTeam.removeMatchByOpponentName(awayTeamName);
-            if (numberOfLegs == 1) {
-                awayTeam.removeMatchByOpponentName(homeTeamName);
-            }
+        Optional<Team> matchingTeam1 = Arrays.stream(teams).filter(t ->
+                t.getName().equals(team1Name)).findFirst();
+        Optional<Team> matchingTeam2 = Arrays.stream(teams).filter(t ->
+                t.getName().equals(team2Name)).findFirst();
+        if (matchingTeam1.isPresent() && matchingTeam2.isPresent()) {
+            Team team1 = matchingTeam1.get();
+            Team team2 = matchingTeam2.get();
+            team1.removeMatchByOpponentName(team2Name, false);
+            team2.removeMatchByOpponentName(team1Name, numberOfLegs == 2);
             sortTeams();
         } else {
             throw new IllegalArgumentException("Team names must be among the ones in the group.");
@@ -115,7 +125,9 @@ public abstract class Group {
      * Compares the ranking of two teams. Each competition will have its own ranking system.
      *
      * @param team1 A football team.
+     *              If the tournament is double-legged, this is the home team.
      * @param team2 A football team that team1 is compared to.
+     *              If the tournament is double-legged, this is the away team.
      *
      * @return A positive integer if team1 is ranked above team2,
      *         a negative integer if team2 is ranked above team1.
@@ -188,6 +200,6 @@ public abstract class Group {
      */
     public boolean isComplete() {
         return Arrays.stream(teams).map(Team::getNumberOfMatchesPlayed)
-                .allMatch(n -> n == teams.length-1);
+                .allMatch(n -> n == (teams.length-1)*numberOfLegs);
     }
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The Team class represents a football team competing in a round-robin tournament
@@ -12,7 +13,8 @@ import java.util.regex.Pattern;
  *
  * Attributes:
  * name: the name of the team.
- * matches: a set of matches, each of them specifying a rival team and the score.
+ * matches: a set of matches, each of them specifying a rival team,
+ *          the score and whether it is a home or away match.
  *
  * Usage:
  * The Team class provides functionality for adding and removing match data
@@ -20,11 +22,8 @@ import java.util.regex.Pattern;
  * It also calculates the amount of points the team has received (+3 per win, +1 per draw, +0 per loss)
  * and its goal difference (goals scored - goals conceded),
  * which will be used to rank the team with its rivals.
- * Other data such as the number of matches played, number of wins, number of draws,
- * number of losses, goals scored, goals conceded, and goal difference will also be displayed in a table.
- *
- * IMPORTANT:
- * If the team plays in a double-legged tournament,
+ * Other data such as the number of matches played, number of wins, number of draws, number of losses,
+ * goals scored, goals conceded, away goals scored and goal difference will also be displayed in a table.
  *
  * This class also contains two public overloaded static methods called createInstance, which will be
  * called by the TeamFactory class to ensure that all Team instances are unique.
@@ -69,12 +68,13 @@ public class Team {
         scoreInvalid = Match.isScoreInvalid(match.getScore());
         isPlayingAgainstItself = match.getOpponentName().equals(this.getName());
         throwExceptionMessage();
-        if (matches.parallelStream().anyMatch(m -> m.getOpponentName().equals(match.getOpponentName()))) {
+        if (matches.parallelStream().anyMatch(
+                m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway == match.isAway)) {
             matches.stream()
-                    .filter(m -> m.getOpponentName().equals(match.getOpponentName()))
+                    .filter(m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway == match.isAway)
                     .forEach(m -> m.setScore(match.getScore())); // update score of existing match
         } else {
-            matches.add(new Match(match.getOpponentName(), match.getScore()));
+            matches.add(new Match(match.getOpponentName(), match.getScore(), match.isAway()));
         }
     }
 
@@ -86,14 +86,16 @@ public class Team {
      * @param score The score of the match against said team.
      *              It consists of two nonnegative integers separated by a '-'.
      *              Its format is "goalsByThisTeam-goalsByRivalTeam".
+     * @param isAway Whether the match is an away match.
+     *               It will always be false if the tournament the competes in is single-legged.
      * @throws IllegalArgumentException If 'score' is not in the format indicated above
      *                                  or 'opponentName' is equal to the team's name.
      */
-    public void addMatch(String opponentName, String score) throws IllegalArgumentException {
+    public void addMatch(String opponentName, String score, boolean isAway) throws IllegalArgumentException {
         scoreInvalid = Match.isScoreInvalid(score);
         isPlayingAgainstItself = opponentName.equals(name);
         throwExceptionMessage();
-        addMatch(new Match(opponentName, score));
+        addMatch(new Match(opponentName, score, isAway));
     }
 
     /**
@@ -117,13 +119,21 @@ public class Team {
      * It does nothing if the team has played no match against the given team.
      *
      * @param opponentName The name of a team that the team played against.
+     * @param isAway Whether the match is an away match.
+     *               It will always be false if the tournament the competes in is single-legged.
      */
-    public void removeMatchByOpponentName(String opponentName) {
-        matches.removeIf(match -> match.getOpponentName().equals(opponentName));
+    public void removeMatchByOpponentName(String opponentName, boolean isAway) {
+        matches.removeIf(match -> match.getOpponentName().equals(opponentName) && match.isAway == isAway);
     }
 
-    // The following methods will be used to display data on a ranking table.
-    // For double-legged tournaments, these will only take into account matches played at home.
+    /**
+     * Returns the set of away matches that the team has played, if the tournament is double-legged.
+     *
+     * @return The set of away matches that the team has played.
+     */
+    public Set<Match> getMatches() {
+        return Collections.unmodifiableSet(matches);
+    }
 
     /**
      * Returns the number of matches the team has won.
@@ -132,7 +142,7 @@ public class Team {
      * @return Number of won matches.
      */
     public int getNumberWins() {
-        return (int) matches.parallelStream().map(Match::getOutcome)
+        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
                 .filter(o -> o.equals(Match.Outcome.WIN)).count();
     }
 
@@ -143,7 +153,7 @@ public class Team {
      * @return Number of drawn matches.
      */
     public int getNumberDraws() {
-        return (int) matches.parallelStream().map(Match::getOutcome)
+        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
                 .filter(o -> o.equals(Match.Outcome.DRAW)).count();
     }
 
@@ -154,7 +164,7 @@ public class Team {
      * @return Number of lost matches.
      */
     public int getNumberLosses() {
-        return (int) matches.parallelStream().map(Match::getOutcome)
+        return (int) this.getMatches().parallelStream().map(Match::getOutcome)
                 .filter(o -> o.equals(Match.Outcome.LOSS)).count();
     }
 
@@ -166,7 +176,7 @@ public class Team {
      * @return The number of points the team has accumulated.
      */
     public int getPoints() {
-        return matches.parallelStream().map(match -> match.getOutcome().getPoints())
+        return this.getMatches().parallelStream().map(match -> match.getOutcome().getPoints())
                 .mapToInt(Integer::intValue).sum();
     }
 
@@ -176,7 +186,7 @@ public class Team {
      * @return The number of goals scored.
      */
     public int getGoalsFor() {
-        return matches.parallelStream().map(Match::getGoalsScored).mapToInt(Integer::intValue).sum();
+        return this.getMatches().parallelStream().map(Match::getGoalsScored).mapToInt(Integer::intValue).sum();
     }
 
     /**
@@ -185,7 +195,7 @@ public class Team {
      * @return The number of goals conceded.
      */
     public int getGoalsAgainst() {
-        return matches.parallelStream().map(Match::getGoalsConceded).mapToInt(Integer::intValue).sum();
+        return this.getMatches().parallelStream().map(Match::getGoalsConceded).mapToInt(Integer::intValue).sum();
     }
 
     /**
@@ -216,7 +226,7 @@ public class Team {
      * @return The number of matches played.
      */
     public int getNumberOfMatchesPlayed() {
-        return matches.size();
+        return this.getMatches().size();
     }
 
     /**
@@ -228,21 +238,40 @@ public class Team {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Team otherTeam = (Team) obj;
-        return name.equals(otherTeam.name) && matches.equals(otherTeam.matches);
+        return name.equals(otherTeam.name) && this.getMatches().equals(otherTeam.getMatches());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, matches);
+        return Objects.hash(name, this.getMatches());
     }
 
     /**
-     * Returns the set of matches that the team has played.
+     * Returns the set of home matches that the team has played.
      *
-     * @return The set of matches that the team has played.
+     * @return The set of home matches that the team has played.
      */
-    public Set<Match> getMatches() {
-        return Collections.unmodifiableSet(matches);
+    public Set<Match> getHomeMatches() {
+        return matches.parallelStream().filter(m -> !m.isAway).collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the set of away matches that the team has played, if the tournament is double-legged.
+     *
+     * @return The set of away matches that the team has played.
+     */
+    public Set<Match> getAwayMatches() {
+        return matches.parallelStream().filter(m -> m.isAway).collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the number of goals the team has scored in away matches.
+     * This will be considered in ranking teams from some tournaments like the Premier League.
+     *
+     * @return The number of away matches that the team has scored.
+     */
+    public int getAwayGoals() {
+        return matches.parallelStream().filter(m -> m.isAway).mapToInt(Match::getGoalsScored).sum();
     }
 
     /**
@@ -256,11 +285,11 @@ public class Team {
 
     /**
      * The Match class represents a football match that the team plays.
-     * It can therefore not be instantiated outside the Team class.
      *
      * Attributes:
      * opponentName: the name of an opponent team.
      * score: the result of the match.
+     * isAway: if the match is an away match in a double-legged tournament.
      *
      * Each score is a string represented in the format "goalsByThisTeam-goalsByOpponent".
      * For example, a match with arguments "Real Madrid" and "3-1" represents a match
@@ -270,12 +299,22 @@ public class Team {
 
         private final String opponentName;
         private String score;
+        private final boolean isAway;
+
+        public Match(String opponentName, String score, boolean isAway) throws IllegalArgumentException {
+            scoreInvalid = isScoreInvalid(score);
+            throwExceptionMessage();
+            this.opponentName = opponentName;
+            this.score = score;
+            this.isAway = isAway;
+        }
 
         public Match(String opponentName, String score) throws IllegalArgumentException {
             scoreInvalid = isScoreInvalid(score);
             throwExceptionMessage();
             this.opponentName = opponentName;
             this.score = score;
+            this.isAway = false;
         }
 
         /**
@@ -317,6 +356,16 @@ public class Team {
 
         public String getOpponentName() {
             return opponentName;
+        }
+
+        /**
+         * Returns whether the match is played away from home during a double-legged tournament.
+         *
+         * @return true if the match is played away from home during a double-legged tournament,
+         *         false if the match is played at home or if the tournament is single-legged.
+         */
+        public boolean isAway() {
+            return this.isAway;
         }
 
         public String getScore() {
@@ -387,7 +436,8 @@ public class Team {
             if (this == obj) return true;
             if (obj == null || getClass() != obj.getClass()) return false;
             Match otherMatch = (Match) obj;
-            return opponentName.equals(otherMatch.opponentName) && score.equals(otherMatch.score);
+            return opponentName.equals(otherMatch.opponentName) &&
+                    score.equals(otherMatch.score) && (isAway == otherMatch.isAway);
         }
 
         @Override

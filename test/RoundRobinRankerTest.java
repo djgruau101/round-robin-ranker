@@ -20,7 +20,7 @@ public class RoundRobinRankerTest {
     public void testGetMatchesEmpty() {
         TeamFactory factory = new TeamFactory();
         Team team = factory.createTeam("Germany");
-        assertEquals(Set.of(), team.getMatches());
+        assertEquals(Set.of(), team.getHomeMatches());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class RoundRobinRankerTest {
     public void testAddMatch1() {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
-        germany.addMatch("Spain", "1-1");
+        germany.addMatch("Spain", "1-1", false);
         assertEquals(Set.of(
                 new Team.Match("Japan", "1-2"),
                 new Team.Match("Spain", "1-1")), germany.getMatches());
@@ -135,7 +135,7 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         // Update the results of an existing match
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
-        germany.addMatch("Japan", "1-4");
+        germany.addMatch("Japan", "1-4", false);
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany.getMatches());
     }
 
@@ -167,7 +167,7 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         // Update the results of an existing match
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
-        germany.removeMatchByOpponentName("Japan");
+        germany.removeMatchByOpponentName("Japan", false);
         assertEquals(Set.of(), germany.getMatches());
     }
 
@@ -176,7 +176,7 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         // Update the results of an existing match
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
-        germany.removeMatchByOpponentName("Spain");
+        germany.removeMatchByOpponentName("Spain", false);
         assertEquals(Set.of(new Team.Match("Japan", "1-2")), germany.getMatches());
     }
 
@@ -211,8 +211,8 @@ public class RoundRobinRankerTest {
         Team germany = factory.createTeam("Germany");
         Team germany2 = factory.createTeam("Germany",
                 Set.of(new Team.Match("Costa Rica", "4-2")));
-        germany.addMatch("Japan", "1-2"); // should apply for both germany and germany2
-        germany2.addMatch("Japan", "1-4");
+        germany.addMatch("Japan", "1-2", false); // should apply for both germany and germany2
+        germany2.addMatch("Japan", "1-4", false);
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany.getMatches());
         assertEquals(Set.of(new Team.Match("Japan", "1-4")), germany2.getMatches());
     }
@@ -224,9 +224,9 @@ public class RoundRobinRankerTest {
         // initialize instance with no matches, then add 3
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
-        germany.addMatch("Japan", "1-2");
-        germany.addMatch("Spain", "1-1");
-        germany.addMatch("Costa Rica", "4-2");
+        germany.addMatch("Japan", "1-2", false);
+        germany.addMatch("Spain", "1-1", false);
+        germany.addMatch("Costa Rica", "4-2", false);
         assertEquals(4, germany.getPoints());
     }
 
@@ -248,8 +248,8 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         Team argentina = factory.createTeam("Argentina",
                 Set.of(new Team.Match("Saudi Arabia", "1-2")));
-        argentina.addMatch("Mexico", "2-0");
-        argentina.addMatch("Poland", "2-0");
+        argentina.addMatch("Mexico", "2-0", false);
+        argentina.addMatch("Poland", "2-0", false);
         assertEquals(6, argentina.getPoints());
     }
 
@@ -411,7 +411,7 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> germany.addMatch("Germany", "2-3"));
+                () -> germany.addMatch("Germany", "2-3", false));
         assertEquals("All opponents' names should be different from the team's name.", exception.getMessage());
     }
 
@@ -420,7 +420,7 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         Team germany = factory.createTeam("Germany");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> germany.addMatch("Germany", "2- 3"));
+                () -> germany.addMatch("Germany", "2- 3", false));
         assertEquals("The score must be two nonnegative integers separated by '-', " +
                 "and all opponents' names should be different from the team's name.", exception.getMessage());
     }
@@ -436,7 +436,7 @@ public class RoundRobinRankerTest {
                 new Team.Match("Chelsea", "3-1"));
         Team manCity2 = Team.createInstance("Manchester City",
                 Set.of(new Team.Match("Manchester United", "4-4")));
-        manCity2.addMatch("Chelsea", "3-1");
+        manCity2.addMatch("Chelsea", "3-1", false);
         manCity2.addMatch(new Team.Match("Liverpool", "1-2"));
         assertEquals(manCity2, manCity1);
     }
@@ -450,7 +450,7 @@ public class RoundRobinRankerTest {
                 new Team.Match("Chelsea", "3-1"));
         Team manCity2 = Team.createInstance("Manchester City",
                 Set.of(new Team.Match("Manchester United", "4-2")));
-        manCity2.addMatch("Chelsea", "3-1");
+        manCity2.addMatch("Chelsea", "3-1", false);
         manCity2.addMatch(new Team.Match("Liverpool", "1-2"));
         assertNotEquals(manCity2, manCity1);
     }
@@ -506,7 +506,7 @@ public class RoundRobinRankerTest {
         Group groupC2022 = groupC2022();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> groupC2022.addMatch("Argentina", "Argentina", "1-2"));
-        assertEquals("The home team and away team cannot be the same.", exception.getMessage());
+        assertEquals("The names of the two teams facing each other cannot be the same.", exception.getMessage());
     }
 
     @Test
@@ -523,7 +523,7 @@ public class RoundRobinRankerTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> groupC2022.addMatch("Argentina", "Argentina", "2 -0"));
         assertEquals("The score must be two nonnegative integers separated by '-'.\n" +
-                "The home team and away team cannot be the same.", exception.getMessage());
+                "The names of the two teams facing each other cannot be the same.", exception.getMessage());
     }
 
     @Test
@@ -555,7 +555,7 @@ public class RoundRobinRankerTest {
         TeamFactory factory = new TeamFactory();
         assertEquals(factory.createTeam("Argentina", Set.of()), argentina);
         // test defensive copying and encapsulation
-        argentina.addMatch("Australia", "2-1");
+        argentina.addMatch("Australia", "2-1", false);
         // the Argentina team instance in the group should not change
         assertEquals(factory.createTeam("Argentina", Set.of()), groupC2022.getTeamByName("Argentina"));
     }
@@ -623,12 +623,37 @@ public class RoundRobinRankerTest {
         Team[] teams = new Team[]{manCity, chelsea, arsenal};
         PremierLeague pl = new PremierLeague(teams);
         pl.addMatch("Manchester City", "Chelsea", "2-1");
-        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Manchester City", "2-4");
         pl.addMatch("Chelsea", "Arsenal", "4-1");
-        assertEquals(Set.of(new Team.Match("Chelsea", "2-1")), manCity.getMatches());
         assertEquals(Set.of(
-                new Team.Match("Manchester City", "3-2"),
-                new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+                new Team.Match("Chelsea", "2-1", false),
+                new Team.Match("Chelsea", "4-2", true)), manCity.getMatches());
+        assertEquals(Set.of(
+                new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Manchester City", "2-4", false),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
+        assertFalse(pl.isComplete());
+    }
+
+    @Test
+    public void testGroupUpdateMatchTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-4");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.addMatch("Chelsea", "Manchester City", "4-2");
+        assertEquals(Set.of(
+                new Team.Match("Chelsea", "2-1", false),
+                new Team.Match("Chelsea", "2-4", true)), manCity.getMatches());
+        assertEquals(Set.of(
+                new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Manchester City", "4-2", false),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
         assertFalse(pl.isComplete());
     }
 
@@ -663,8 +688,9 @@ public class RoundRobinRankerTest {
         pl.addMatch("Chelsea", "Manchester City", "3-2");
         pl.addMatch("Chelsea", "Arsenal", "4-1");
         pl.removeMatch("Chelsea", "Manchester City");
-        assertEquals(Set.of(new Team.Match("Chelsea", "2-1")), manCity.getMatches());
-        assertEquals(Set.of(new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+        assertEquals(Set.of(new Team.Match("Chelsea", "2-1", false)), manCity.getMatches());
+        assertEquals(Set.of(new Team.Match("Arsenal", "4-1", false),
+                            new Team.Match("Manchester City", "1-2", true)), chelsea.getMatches());
         assertFalse(pl.isComplete());
     }
 
@@ -673,7 +699,7 @@ public class RoundRobinRankerTest {
         Group groupC2022 = groupC2022Complete();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> groupC2022.removeMatch("Argentina", "Argentina"));
-        assertEquals("The home team and away team cannot be the same.", exception.getMessage());
+        assertEquals("The names of the two teams facing each other cannot be the same.", exception.getMessage());
     }
 
     @Test
@@ -716,8 +742,44 @@ public class RoundRobinRankerTest {
         pl.addMatch("Chelsea", "Manchester City", "3-2");
         pl.addMatch("Chelsea", "Arsenal", "4-1");
         pl.removeMatch("Chelsea", "Manchester City");
-        assertEquals(Set.of(new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+        assertEquals(Set.of(new Team.Match("Manchester City", "1-2", true),
+                            new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
         pl.removeMatch("Chelsea", "Liverpool");
-        assertEquals(Set.of(new Team.Match("Arsenal", "4-1")), chelsea.getMatches());
+        assertEquals(Set.of(new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
+    }
+
+    @Test
+    public void testGetHomeAndAwayMatches() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team liverpool = factory.createTeam("Liverpool");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal, liverpool};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.removeMatch("Chelsea", "Manchester City");
+        assertEquals(Set.of(
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getHomeMatches());
+        assertEquals(Set.of(
+                new Team.Match("Manchester City", "1-2", true)), chelsea.getAwayMatches());
+    }
+
+    @Test
+    public void testGetAwayGoals() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team liverpool = factory.createTeam("Liverpool");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal, liverpool};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Chelsea", "Manchester City", "2-1");
+        pl.addMatch("Arsenal", "Chelsea", "4-1");
+        pl.addMatch("Liverpool", "Chelsea", "4-5");
+        assertEquals(6, chelsea.getAwayGoals());
     }
 }
