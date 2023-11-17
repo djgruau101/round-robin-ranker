@@ -16,6 +16,40 @@ public class RoundRobinRankerTest {
         Team.resetStaticState();
     }
 
+    /**
+     * Constructs a new FIFAWorldCupGroup that represents Group C from the 2022 FIFA World Cup.
+     * Its teams are Argentina, Saudi Arabia, Poland and Mexico.
+     *
+     * @return Group C of the 2022 FIFA World Cup
+     */
+    FIFAWorldCupGroup groupC2022() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina");
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        Team poland = factory.createTeam("Poland");
+        Team mexico = factory.createTeam("Mexico");
+        Team[] teams = new Team[]{argentina, saudiArabia, poland, mexico};
+        return new FIFAWorldCupGroup(teams);
+    }
+
+    /**
+     * Constructs a new FIFAWorldCupGroup that represents the
+     * actual results of Group C from the 2022 FIFA World Cup.
+     * Its teams are Argentina, Saudi Arabia, Poland and Mexico.
+     *
+     * @return Group C of the 2022 FIFA World Cup
+     */
+    FIFAWorldCupGroup groupC2022Complete() {
+        FIFAWorldCupGroup groupC2022 = groupC2022();
+        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
+        groupC2022.addMatch("Poland", "Mexico", "0-0");
+        groupC2022.addMatch("Poland", "Saudi Arabia", "2-0");
+        groupC2022.addMatch("Argentina", "Mexico", "2-0");
+        groupC2022.addMatch("Poland", "Argentina", "0-2");
+        groupC2022.addMatch("Saudi Arabia", "Mexico", "1-2");
+        return groupC2022;
+    }
+
     @Test
     public void testGetMatchesEmpty() {
         TeamFactory factory = new TeamFactory();
@@ -108,7 +142,7 @@ public class RoundRobinRankerTest {
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
     }
 
-    // testing adding and removing matches
+    // testing adding and removing matches for single-legged tournaments
 
     @Test
     public void testAddMatch1() {
@@ -178,6 +212,173 @@ public class RoundRobinRankerTest {
         Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2")));
         germany.removeMatchByOpponentName("Spain", false);
         assertEquals(Set.of(new Team.Match("Japan", "1-2")), germany.getMatches());
+    }
+
+    // test adding and removing matches from groups for single-legged tournaments
+
+    @Test
+    public void testGroupRemoveMatchOneLeg() {
+        Group groupC2022 = groupC2022Complete();
+        groupC2022.removeMatch("Argentina", "Poland");
+        groupC2022.removeMatch("Mexico", "Saudi Arabia");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Poland", "0-2"),
+                new Team.Match("Argentina", "2-1")),
+                groupC2022.getTeamByName("Saudi Arabia").getMatches());
+        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
+                new Team.Match("Saudi Arabia", "2-0")),
+                groupC2022.getTeamByName("Poland").getMatches());
+        assertEquals(Set.of(new Team.Match("Poland", "0-0"),
+                new Team.Match("Argentina", "0-2")),
+                groupC2022.getTeamByName("Mexico").getMatches());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTwiceOneLeg() {
+        Group groupC2022 = groupC2022Complete();
+        groupC2022.removeMatch("Argentina", "Poland");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
+                new Team.Match("Saudi Arabia", "2-0")),
+                groupC2022.getTeamByName("Poland").getMatches());
+        groupC2022.removeMatch("Argentina", "Poland");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
+                new Team.Match("Mexico", "2-0")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
+                new Team.Match("Saudi Arabia", "2-0")),
+                groupC2022.getTeamByName("Poland").getMatches());
+    }
+
+    @Test
+    public void testGroupAddMatchOneLeg() {
+        Group groupC2022 = groupC2022();
+        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2")),
+                groupC2022.getTeamByName("Argentina").getMatches());
+        assertEquals(Set.of(new Team.Match("Argentina", "2-1")),
+                groupC2022.getTeamByName("Saudi Arabia").getMatches());
+    }
+
+    // testing adding and removing matches for double-legged tournaments
+
+    @Test
+    public void testGroupAddMatchTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-4");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        assertEquals(Set.of(
+                new Team.Match("Chelsea", "2-1", false),
+                new Team.Match("Chelsea", "4-2", true)), manCity.getMatches());
+        assertEquals(Set.of(
+                new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Manchester City", "2-4", false),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
+        assertFalse(pl.isComplete());
+    }
+
+    @Test
+    public void testGroupUpdateMatchTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-4");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.addMatch("Chelsea", "Manchester City", "4-2");
+        assertEquals(Set.of(
+                new Team.Match("Chelsea", "2-1", false),
+                new Team.Match("Chelsea", "2-4", true)), manCity.getMatches());
+        assertEquals(Set.of(
+                new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Manchester City", "4-2", false),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
+        assertFalse(pl.isComplete());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.removeMatch("Chelsea", "Manchester City");
+        assertEquals(Set.of(new Team.Match("Chelsea", "2-1", false)), manCity.getMatches());
+        assertEquals(Set.of(new Team.Match("Arsenal", "4-1", false),
+                new Team.Match("Manchester City", "1-2", true)), chelsea.getMatches());
+        assertFalse(pl.isComplete());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTwiceTwoLegs() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team liverpool = factory.createTeam("Liverpool");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal, liverpool};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "3-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        pl.removeMatch("Chelsea", "Manchester City");
+        assertEquals(Set.of(new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
+        pl.removeMatch("Chelsea", "Liverpool");
+        assertEquals(Set.of(new Team.Match("Manchester City", "1-2", true),
+                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
+    }
+
+    // testing exception handling for adding matches
+
+    @Test
+    public void testGroupAddMatchTeamNameNotInGroup() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.addMatch("Argentina", "Australia", "2-1"));
+        assertEquals("Team names must be among the ones in the group.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupRemoveMatchHomeEqualsAwayError() {
+        Group groupC2022 = groupC2022Complete();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.removeMatch("Argentina", "Argentina"));
+        assertEquals("The names of the two teams facing each other cannot be the same.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupRemoveMatchTeamNotInGroupError() {
+        Group groupC2022 = groupC2022Complete();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.removeMatch("Argentina", "Australia"));
+        assertEquals("Team names must be among the ones in the group.", exception.getMessage());
+    }
+
+    @Test
+    public void testGroupAddMatchPlayingAgainstItself() {
+        Group groupC2022 = groupC2022();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> groupC2022.addMatch("Argentina", "Argentina", "1-2"));
+        assertEquals("The names of the two teams facing each other cannot be the same.", exception.getMessage());
     }
 
     // testing creation of unique team instances
@@ -251,6 +452,20 @@ public class RoundRobinRankerTest {
         argentina.addMatch("Mexico", "2-0", false);
         argentina.addMatch("Poland", "2-0", false);
         assertEquals(6, argentina.getPoints());
+    }
+
+    @Test
+    public void testGetPointsTwoLegged() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        assertEquals(4, chelsea.getPoints());
     }
 
     // testing calculations of number of wins, losses, draws, GF, GA, GD
@@ -355,6 +570,20 @@ public class RoundRobinRankerTest {
     }
 
     @Test
+    public void testGDTwoLegged() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-4");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        assertEquals(0, chelsea.getGoalDifference());
+    }
+
+    @Test
     public void testGF() {
         TeamFactory factory = new TeamFactory();
         Team saudiArabia = factory.createTeam("Saudi Arabia");
@@ -363,6 +592,20 @@ public class RoundRobinRankerTest {
                 new Team.Match("Mexico", "1-2"),
                 new Team.Match("Poland", "0-2"));
         assertEquals(3, saudiArabia.getGoalsFor());
+    }
+
+    @Test
+    public void testGFTwoLegged() {
+        TeamFactory factory = new TeamFactory();
+        Team manCity = factory.createTeam("Manchester City");
+        Team chelsea = factory.createTeam("Chelsea");
+        Team arsenal = factory.createTeam("Arsenal");
+        Team[] teams = new Team[]{manCity, chelsea, arsenal};
+        PremierLeague pl = new PremierLeague(teams);
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-4");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        assertEquals(7, chelsea.getGoalsFor());
     }
 
     @Test
@@ -455,59 +698,7 @@ public class RoundRobinRankerTest {
         assertNotEquals(manCity2, manCity1);
     }
 
-    // testing group operations
-
-    /**
-     * Constructs a new FIFAWorldCupGroup that represents Group C from the 2022 FIFA World Cup.
-     * Its teams are Argentina, Saudi Arabia, Poland and Mexico.
-     *
-     * @return Group C of the 2022 FIFA World Cup
-     */
-    FIFAWorldCupGroup groupC2022() {
-        TeamFactory factory = new TeamFactory();
-        Team argentina = factory.createTeam("Argentina");
-        Team saudiArabia = factory.createTeam("Saudi Arabia");
-        Team poland = factory.createTeam("Poland");
-        Team mexico = factory.createTeam("Mexico");
-        Team[] teams = new Team[]{argentina, saudiArabia, poland, mexico};
-        return new FIFAWorldCupGroup(teams);
-    }
-
-    /**
-     * Constructs a new FIFAWorldCupGroup that represents the
-     * actual results of Group C from the 2022 FIFA World Cup.
-     * Its teams are Argentina, Saudi Arabia, Poland and Mexico.
-     *
-     * @return Group C of the 2022 FIFA World Cup
-     */
-    FIFAWorldCupGroup groupC2022Complete() {
-        FIFAWorldCupGroup groupC2022 = groupC2022();
-        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
-        groupC2022.addMatch("Poland", "Mexico", "0-0");
-        groupC2022.addMatch("Poland", "Saudi Arabia", "2-0");
-        groupC2022.addMatch("Argentina", "Mexico", "2-0");
-        groupC2022.addMatch("Poland", "Argentina", "0-2");
-        groupC2022.addMatch("Saudi Arabia", "Mexico", "1-2");
-        return groupC2022;
-    }
-
-    @Test
-    public void testGroupAddMatchOneLeg() {
-        Group groupC2022 = groupC2022();
-        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2")),
-                groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Argentina", "2-1")),
-                groupC2022.getTeamByName("Saudi Arabia").getMatches());
-    }
-
-    @Test
-    public void testGroupAddMatchPlayingAgainstItself() {
-        Group groupC2022 = groupC2022();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> groupC2022.addMatch("Argentina", "Argentina", "1-2"));
-        assertEquals("The names of the two teams facing each other cannot be the same.", exception.getMessage());
-    }
+    // testing specific operations for groups exceptions
 
     @Test
     public void testGroupAddMatchScoreInvalid() {
@@ -524,14 +715,6 @@ public class RoundRobinRankerTest {
                 () -> groupC2022.addMatch("Argentina", "Argentina", "2 -0"));
         assertEquals("The score must be two nonnegative integers separated by '-'.\n" +
                 "The names of the two teams facing each other cannot be the same.", exception.getMessage());
-    }
-
-    @Test
-    public void testGroupAddMatchTeamNameNotInGroup() {
-        Group groupC2022 = groupC2022();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> groupC2022.addMatch("Argentina", "Australia", "2-1"));
-        assertEquals("Team names must be among the ones in the group.", exception.getMessage());
     }
 
     @Test
@@ -567,6 +750,8 @@ public class RoundRobinRankerTest {
                 () -> groupC2022.getTeamByName("Australia"));
         assertEquals("No team of name Australia is in this group.", exception.getMessage());
     }
+
+    // testing ranking of teams in a group
 
     @Test
     public void testFIFARankingGDTie() {
@@ -614,140 +799,7 @@ public class RoundRobinRankerTest {
         assertTrue(groupC2022.isComplete());
     }
 
-    @Test
-    public void testGroupAddMatchTwoLegs() {
-        TeamFactory factory = new TeamFactory();
-        Team manCity = factory.createTeam("Manchester City");
-        Team chelsea = factory.createTeam("Chelsea");
-        Team arsenal = factory.createTeam("Arsenal");
-        Team[] teams = new Team[]{manCity, chelsea, arsenal};
-        PremierLeague pl = new PremierLeague(teams);
-        pl.addMatch("Manchester City", "Chelsea", "2-1");
-        pl.addMatch("Chelsea", "Manchester City", "2-4");
-        pl.addMatch("Chelsea", "Arsenal", "4-1");
-        assertEquals(Set.of(
-                new Team.Match("Chelsea", "2-1", false),
-                new Team.Match("Chelsea", "4-2", true)), manCity.getMatches());
-        assertEquals(Set.of(
-                new Team.Match("Manchester City", "1-2", true),
-                new Team.Match("Manchester City", "2-4", false),
-                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
-        assertFalse(pl.isComplete());
-    }
-
-    @Test
-    public void testGroupUpdateMatchTwoLegs() {
-        TeamFactory factory = new TeamFactory();
-        Team manCity = factory.createTeam("Manchester City");
-        Team chelsea = factory.createTeam("Chelsea");
-        Team arsenal = factory.createTeam("Arsenal");
-        Team[] teams = new Team[]{manCity, chelsea, arsenal};
-        PremierLeague pl = new PremierLeague(teams);
-        pl.addMatch("Manchester City", "Chelsea", "2-1");
-        pl.addMatch("Chelsea", "Manchester City", "2-4");
-        pl.addMatch("Chelsea", "Arsenal", "4-1");
-        pl.addMatch("Chelsea", "Manchester City", "4-2");
-        assertEquals(Set.of(
-                new Team.Match("Chelsea", "2-1", false),
-                new Team.Match("Chelsea", "2-4", true)), manCity.getMatches());
-        assertEquals(Set.of(
-                new Team.Match("Manchester City", "1-2", true),
-                new Team.Match("Manchester City", "4-2", false),
-                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
-        assertFalse(pl.isComplete());
-    }
-
-    @Test
-    public void testGroupRemoveMatchOneLeg() {
-        Group groupC2022 = groupC2022Complete();
-        groupC2022.removeMatch("Argentina", "Poland");
-        groupC2022.removeMatch("Mexico", "Saudi Arabia");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
-                new Team.Match("Mexico", "2-0")),
-                groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Poland", "0-2"),
-                new Team.Match("Argentina", "2-1")),
-                groupC2022.getTeamByName("Saudi Arabia").getMatches());
-        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
-                new Team.Match("Saudi Arabia", "2-0")),
-                groupC2022.getTeamByName("Poland").getMatches());
-        assertEquals(Set.of(new Team.Match("Poland", "0-0"),
-                new Team.Match("Argentina", "0-2")),
-                groupC2022.getTeamByName("Mexico").getMatches());
-    }
-
-    @Test
-    public void testGroupRemoveMatchTwoLegs() {
-        TeamFactory factory = new TeamFactory();
-        Team manCity = factory.createTeam("Manchester City");
-        Team chelsea = factory.createTeam("Chelsea");
-        Team arsenal = factory.createTeam("Arsenal");
-        Team[] teams = new Team[]{manCity, chelsea, arsenal};
-        PremierLeague pl = new PremierLeague(teams);
-        pl.addMatch("Manchester City", "Chelsea", "2-1");
-        pl.addMatch("Chelsea", "Manchester City", "3-2");
-        pl.addMatch("Chelsea", "Arsenal", "4-1");
-        pl.removeMatch("Chelsea", "Manchester City");
-        assertEquals(Set.of(new Team.Match("Chelsea", "2-1", false)), manCity.getMatches());
-        assertEquals(Set.of(new Team.Match("Arsenal", "4-1", false),
-                            new Team.Match("Manchester City", "1-2", true)), chelsea.getMatches());
-        assertFalse(pl.isComplete());
-    }
-
-    @Test
-    public void testGroupRemoveMatchHomeEqualsAwayError() {
-        Group groupC2022 = groupC2022Complete();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> groupC2022.removeMatch("Argentina", "Argentina"));
-        assertEquals("The names of the two teams facing each other cannot be the same.", exception.getMessage());
-    }
-
-    @Test
-    public void testGroupRemoveMatchTeamNotInGroupError() {
-        Group groupC2022 = groupC2022Complete();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> groupC2022.removeMatch("Argentina", "Australia"));
-        assertEquals("Team names must be among the ones in the group.", exception.getMessage());
-    }
-
-    @Test
-    public void testGroupRemoveMatchTwiceOneLeg() {
-        Group groupC2022 = groupC2022Complete();
-        groupC2022.removeMatch("Argentina", "Poland");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
-                new Team.Match("Mexico", "2-0")),
-                groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
-                new Team.Match("Saudi Arabia", "2-0")),
-                groupC2022.getTeamByName("Poland").getMatches());
-        groupC2022.removeMatch("Argentina", "Poland");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
-                new Team.Match("Mexico", "2-0")),
-                groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
-                new Team.Match("Saudi Arabia", "2-0")),
-                groupC2022.getTeamByName("Poland").getMatches());
-    }
-
-    @Test
-    public void testGroupRemoveMatchTwiceTwoLegs() {
-        TeamFactory factory = new TeamFactory();
-        Team manCity = factory.createTeam("Manchester City");
-        Team chelsea = factory.createTeam("Chelsea");
-        Team arsenal = factory.createTeam("Arsenal");
-        Team liverpool = factory.createTeam("Liverpool");
-        Team[] teams = new Team[]{manCity, chelsea, arsenal, liverpool};
-        PremierLeague pl = new PremierLeague(teams);
-        pl.addMatch("Manchester City", "Chelsea", "2-1");
-        pl.addMatch("Chelsea", "Manchester City", "3-2");
-        pl.addMatch("Chelsea", "Arsenal", "4-1");
-        pl.removeMatch("Chelsea", "Manchester City");
-        assertEquals(Set.of(new Team.Match("Manchester City", "1-2", true),
-                            new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
-        pl.removeMatch("Chelsea", "Liverpool");
-        assertEquals(Set.of(new Team.Match("Manchester City", "1-2", true),
-                new Team.Match("Arsenal", "4-1", false)), chelsea.getMatches());
-    }
+    // testing specific methods for two-legged tournaments: home and away matches and goals
 
     @Test
     public void testGetHomeAndAwayMatches() {
