@@ -202,4 +202,12 @@ public abstract class Group {
         return Arrays.stream(teams).map(Team::getNumberOfMatchesPlayed)
                 .allMatch(n -> n == (teams.length-1)*numberOfLegs);
     }
+
+    public String getTableRowByTeamName(String teamName) {
+        Team team = getTeamByName(teamName);
+        return String.format("%d: %s, Pld: %d, W: %d, D: %d, L: %d, GF: %d, GA: %d, GD: %s, Pts: %d",
+                getTeamPositionByName(teamName), teamName, team.getNumberOfMatchesPlayed(),
+                team.getNumberWins(), team.getNumberDraws(), team.getNumberLosses(), team.getGoalsFor(),
+                team.getGoalsAgainst(), team.getGoalDifferenceToString(), team.getPoints());
+    }
 }

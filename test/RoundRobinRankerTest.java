@@ -834,4 +834,20 @@ public class RoundRobinRankerTest {
         pl.addMatch("Liverpool", "Chelsea", "4-5");
         assertEquals(6, chelsea.getAwayGoals());
     }
+
+    // test printing table
+
+    @Test
+    public void testGetTableRowByTeamName() {
+        Group groupC2022 = groupC2022Complete();
+        groupC2022.sortTeams();
+        assertEquals("1: Argentina, Pld: 3, W: 2, D: 0, L: 1, GF: 5, GA: 2, GD: +3, Pts: 6",
+                groupC2022.getTableRowByTeamName("Argentina"));
+        assertEquals("2: Poland, Pld: 3, W: 1, D: 1, L: 1, GF: 2, GA: 2, GD: 0, Pts: 4",
+                groupC2022.getTableRowByTeamName("Poland"));
+        assertEquals("3: Mexico, Pld: 3, W: 1, D: 1, L: 1, GF: 2, GA: 3, GD: -1, Pts: 4",
+                groupC2022.getTableRowByTeamName("Mexico"));
+        assertEquals("4: Saudi Arabia, Pld: 3, W: 1, D: 0, L: 2, GF: 3, GA: 5, GD: -2, Pts: 3",
+                groupC2022.getTableRowByTeamName("Saudi Arabia"));
+    }
 }
