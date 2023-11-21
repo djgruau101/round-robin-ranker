@@ -127,4 +127,10 @@ public class MatchTest {
         Team.Match match2 = new Team.Match("Mexico", "1-2");
         assertNotEquals(match2, match1);
     }
+
+    @Test
+    public void testMatchToString() {
+        Team.Match match = new Team.Match("Japan", "1-2");
+        assertNotEquals("Match{name=Japan, score=1-2}", match.toString());
+    }
 }

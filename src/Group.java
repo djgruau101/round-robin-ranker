@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -23,7 +24,6 @@ import java.util.stream.IntStream;
 public abstract class Group {
 
     private final Team[] teams;
-    private final int groupSize;
     private final int numberOfLegs;
     private final Map<Team,Integer> teamByPosition = new HashMap<>();
 
@@ -36,8 +36,24 @@ public abstract class Group {
         } if (numberOfLegs != 1 && numberOfLegs != 2) {
             throw new IllegalArgumentException("The number of legs must be either 1 or 2.");
         }
-        this.teams = teams;
-        this.groupSize = groupSize;
+        // remove opponents not present from the group instead of throwing an exception:
+        // we may need to create groups with a subset of the teams to determine head-to-head results
+        Map<String,Set<Team.Match>> teamNameByMatches = Arrays.stream(teams).collect(
+                Collectors.toMap(
+                        Team::getName,
+                        t -> t.getMatches().parallelStream().filter(m ->
+                                Arrays.stream(teams).map(Team::getName).anyMatch(n ->
+                                        n.equals(m.getOpponentName())
+                                )).collect(Collectors.toSet())));
+        // will be thrown only for cases where at least one Team in the constructor already has matches
+        if (numberOfLegs == 1) {
+            // there should not be away matches if there is only one leg
+            if (teamNameByMatches.values().parallelStream().flatMap(Set::stream).anyMatch(Team.Match::isAway)) {
+                throw new IllegalArgumentException("Single-legged tournaments can not contain away matches.");
+            }
+        }
+        this.teams = teamNameByMatches.entrySet().parallelStream().map(
+                entry -> Team.createInstance(entry.getKey(), entry.getValue())).toArray(Team[]::new);
         this.numberOfLegs = numberOfLegs;
     }
 

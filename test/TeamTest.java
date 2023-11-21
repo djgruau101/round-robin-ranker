@@ -471,4 +471,20 @@ public class TeamTest {
         Team team = factory.createTeam("Manchester City");
         assertEquals("Manchester City", team.getName());
     }
+
+    @Test
+    public void testTeamToStringNoMatches() {
+        TeamFactory factory = new TeamFactory();
+        Team team = factory.createTeam("Manchester City");
+        assertEquals("Team{name=Manchester City, matches={}}", team.toString());
+    }
+
+    @Test
+    public void testTeamToStringWithMatches() {
+        TeamFactory factory = new TeamFactory();
+        Team team = factory.createTeam("Manchester City");
+        team.addMatch("Chelsea", "4-4", false);
+        team.addMatch("Arsenal", "0-1", true);
+        assertEquals("Team{name=Manchester City, matches={Match{opponentName=Chelsea, score=4-4, isAway=false}, Match{opponentName=Arsenal, score=0-1, isAway=true}}}", team.toString());
+    }
 }

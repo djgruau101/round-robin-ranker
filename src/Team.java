@@ -283,6 +283,14 @@ public class Team {
         return name;
     }
 
+    public String toString() {
+        String initialString = "Team{name=%s, matches={";
+        String result = matches.parallelStream().map(Team.Match::toString)
+                .collect(Collectors.joining(", ", initialString, "}"));
+        result += "}";
+        return String.format(result, name);
+    }
+
     /**
      * The Match class represents a football match that the team plays.
      *
@@ -438,6 +446,10 @@ public class Team {
             Match otherMatch = (Match) obj;
             return opponentName.equals(otherMatch.opponentName) &&
                     score.equals(otherMatch.score) && (isAway == otherMatch.isAway);
+        }
+
+        public String toString() {
+            return String.format("Match{opponentName=%s, score=%s, isAway=%b}", opponentName, score, isAway);
         }
 
         @Override

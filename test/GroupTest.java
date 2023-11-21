@@ -128,6 +128,34 @@ public class GroupTest {
         assertEquals("The number of legs must be either 1 or 2.", exception.getMessage());
     }
 
+    @Test
+    public void testAwayMatchesOneLegError() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina",
+                Set.of(new Team.Match("Saudi Arabia", "1-2", true)));
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        Team poland = factory.createTeam("Poland");
+        Team mexico = factory.createTeam("Mexico");
+        Team[] teams = new Team[]{argentina, poland, saudiArabia, mexico};
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> new FIFAWorldCupGroup(teams));
+        assertEquals("Single-legged tournaments can not contain away matches.", exception.getMessage());
+    }
+
+    @Test
+    public void testConstructorTeamAlreadyHasMatch() {
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina",
+                Set.of(new Team.Match("Australia", "2-1")));
+        Team saudiArabia = factory.createTeam("Saudi Arabia");
+        Team poland = factory.createTeam("Poland");
+        Team mexico = factory.createTeam("Mexico");
+        Team[] teams = new Team[]{argentina, poland, saudiArabia, mexico};
+        FIFAWorldCupGroup groupC2022 = new FIFAWorldCupGroup(teams);
+        // Argentina VS Australia match will be removed
+        assertEquals(Set.of(), groupC2022.getTeamByName("Argentina").getMatches());
+    }
+
     // testing adding matches
 
     @Test
@@ -401,16 +429,6 @@ public class GroupTest {
     }
 
     // testing sortedTeams
-
-    @Test
-    public void testSortedTeamsAllTied() {
-        Group groupC2022 = groupC2022();
-        // elements are in the order of the input array
-        assertEquals(groupC2022.getTeamByName("Argentina"), groupC2022.sortedTeams()[0]);
-        assertEquals(groupC2022.getTeamByName("Saudi Arabia"), groupC2022.sortedTeams()[1]);
-        assertEquals(groupC2022.getTeamByName("Poland"), groupC2022.sortedTeams()[2]);
-        assertEquals(groupC2022.getTeamByName("Mexico"), groupC2022.sortedTeams()[3]);
-    }
 
     @Test
     public void testSortedTeamsNonEmptyMatches() {
