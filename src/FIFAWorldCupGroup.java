@@ -39,6 +39,7 @@ public class FIFAWorldCupGroup extends Group {
             return resultBeforeHeadToHead;
         }
         // compare head-to-head record
+        FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
 
         // disciplinary record
 

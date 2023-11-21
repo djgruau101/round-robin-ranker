@@ -104,8 +104,17 @@ public class GroupTest {
                 super(teams, 4, 3); // incorrect usage of constructor
             }
 
+            @Override
             public int compareTeams(Team team1, Team team2) {
                 return 0;
+            }
+
+            protected int compareTeamsBeforeHeadToHead(Team team1, Team team2) {
+                return 0;
+            }
+
+            protected TestGroup createSubGroup(Team team) {
+                return new TestGroup(new Team[]{team});
             }
         }
         TeamFactory factory = new TeamFactory();
