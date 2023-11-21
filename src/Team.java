@@ -127,9 +127,9 @@ public class Team {
     }
 
     /**
-     * Returns the set of away matches that the team has played, if the tournament is double-legged.
+     * Returns the set of matches that the team has played.
      *
-     * @return The set of away matches that the team has played.
+     * @return The set of matches that the team has played.
      */
     public Set<Match> getMatches() {
         return Collections.unmodifiableSet(matches);
