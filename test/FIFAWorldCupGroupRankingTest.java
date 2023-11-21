@@ -78,4 +78,29 @@ public class FIFAWorldCupGroupRankingTest {
         assertEquals("4: Ghana, Pld: 3, W: 1, D: 0, L: 2, GF: 5, GA: 7, GD: -2, Pts: 3",
                 groupH2022.getTableRowByTeamName("Ghana"));
     }
+
+    @Test
+    public void testHeadToHeadTwoTeams() {
+        // Japan x Colombia and Senegal x Poland are tied on points and GD, and GF, but head-to-head result is not a draw
+        FIFAWorldCupGroup groupH2018Adapted = createGroup("Senegal", "Japan", "Poland", "Colombia");
+        groupH2018Adapted.addMatch("Colombia", "Japan", "1-2");
+        groupH2018Adapted.addMatch("Poland", "Senegal", "1-2");
+        groupH2018Adapted.addMatch("Japan", "Senegal", "5-2");
+        groupH2018Adapted.addMatch("Poland", "Colombia", "2-5");
+        groupH2018Adapted.addMatch("Japan", "Poland", "0-1");
+        groupH2018Adapted.addMatch("Senegal", "Colombia", "0-1");
+
+        // Japan 6, Senegal 3, Poland 3, Colombia 6
+        // Japan +3, Senegal -3, Poland -3, Colombia +3
+        // GF: Japan 7, Senegal 4, Poland 4, Colombia 7
+
+        assertEquals("1: Colombia, Pld: 3, W: 2, D: 0, L: 1, GF: 7, GA: 4, GD: +3, Pts: 6",
+                groupH2018Adapted.getTableRowByTeamName("Colombia"));
+        assertEquals("2: Japan, Pld: 3, W: 2, D: 0, L: 1, GF: 7, GA: 4, GD: +3, Pts: 6",
+                groupH2018Adapted.getTableRowByTeamName("Japan"));
+        assertEquals("3: Senegal, Pld: 3, W: 1, D: 0, L: 2, GF: 4, GA: 7, GD: -3, Pts: 3",
+                groupH2018Adapted.getTableRowByTeamName("Senegal"));
+        assertEquals("4: Poland, Pld: 3, W: 1, D: 0, L: 2, GF: 4, GA: 7, GD: -3, Pts: 3",
+                groupH2018Adapted.getTableRowByTeamName("Poland"));
+    }
 }
