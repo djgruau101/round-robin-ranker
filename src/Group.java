@@ -146,6 +146,10 @@ public abstract class Group {
         throw new IllegalArgumentException(String.format("No team of name %s is in this group.", teamName));
     }
 
+    public Set<String> getTeamNames() {
+        return Arrays.stream(teams).map(Team::getName).collect(Collectors.toSet());
+    }
+
     /**
      * Compares the ranking of two teams. Each competition will have its own ranking system.
      *

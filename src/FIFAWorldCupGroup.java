@@ -62,6 +62,7 @@ public class FIFAWorldCupGroup extends Group {
 
     @Override
     protected FIFAWorldCupGroup createSubGroup(Team team) {
+
         return new FIFAWorldCupGroup(new Team[]{team}); // to be implemented
     }
 }

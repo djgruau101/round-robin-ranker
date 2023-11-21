@@ -389,6 +389,12 @@ public class GroupTest {
         assertEquals("No team of name Real Madrid is in this group.", exception.getMessage());
     }
 
+    @Test
+    public void testGetTeamNames() {
+        Group groupC2022 = groupC2022Complete();
+        assertEquals(Set.of("Argentina", "Saudi Arabia", "Poland", "Mexico"), groupC2022.getTeamNames());
+    }
+
     // testing compareTeams
 
     @Test
