@@ -28,6 +28,18 @@ public class PremierLeague extends Group {
      */
     @Override
     public int compareTeams(Team team1, Team team2) {
+        int resultBeforeHeadToHead = compareTeamsBeforeHeadToHead(team1, team2);
+        if (resultBeforeHeadToHead != 0) {
+            return resultBeforeHeadToHead;
+        }
+
+        // compare head-to-head record and away goals
+
+        return 0; // partial implementation for now
+    }
+
+    @Override
+    protected int compareTeamsBeforeHeadToHead(Team team1, Team team2) {
         if (team1.getPoints() != team2.getPoints()) {
             return team1.getPoints() - team2.getPoints(); // max number of points is 9, min is 0
         } if (team1.getGoalDifference() != team2.getGoalDifference()) { // compare GD
@@ -35,9 +47,11 @@ public class PremierLeague extends Group {
         } if (team1.getGoalsFor() != team2.getGoalsFor()) { // compare GA
             return Integer.compare(team1.getGoalsFor(), team2.getGoalsFor());
         }
+        return 0;
+    }
 
-        // compare head-to-head record and away goals
-
-        return 0; // partial implementation for now
+    @Override
+    protected Group createSubGroup(Team team) {
+        return new PremierLeague(new Team[]{team}); // to be implemented
     }
 }

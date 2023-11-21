@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 public abstract class Group {
 
     private final Team[] teams;
+    private final int groupSize;
     private final int numberOfLegs;
     private final Map<Team,Integer> teamByPosition = new HashMap<>();
 
@@ -36,6 +37,7 @@ public abstract class Group {
             throw new IllegalArgumentException("The number of legs must be either 1 or 2.");
         }
         this.teams = teams;
+        this.groupSize = groupSize;
         this.numberOfLegs = numberOfLegs;
     }
 
@@ -154,6 +156,30 @@ public abstract class Group {
     public int compareTeams(String team1Name, String team2Name) {
         return compareTeams(getTeamByName(team1Name), getTeamByName(team2Name));
     }
+
+    /**
+     * Compares the ranking of two teams before comparing their head-to-head record.
+     * Head-to-head record will be compared only if
+     * This is a helper method for compareTeams. Each competition will have its own ranking system.
+     *
+     * @param team1 A football team.
+     *              If the tournament is double-legged, this is the home team.
+     * @param team2 A football team that team1 is compared to.
+     *              If the tournament is double-legged, this is the away team.
+     *
+     * @return A positive integer if team1 is ranked above team2,
+     *         a negative integer if team2 is ranked above team1,
+     *         or 0 if team1 and team2 are tied on all criteria before head-to-head record.
+     */
+    protected abstract int compareTeamsBeforeHeadToHead(Team team1, Team team2);
+
+    /**
+     * Takes a team from the group and returns a group only consisting of itself and the
+     * teams that are tied with it on all criteria before applying the head-to-head record.
+     *
+     * @return A group of tied teams.
+     */
+    protected abstract Group createSubGroup(Team team);
 
     /**
      * Sorts the group's teams from highest ranked to lowest ranked
