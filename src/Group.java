@@ -1,7 +1,4 @@
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -32,6 +29,9 @@ public abstract class Group {
     public Group(Team[] teams, int groupSize, int numberOfLegs) throws IllegalArgumentException {
         if (teams.length > groupSize) {
             throw new IllegalArgumentException(String.format("The number of teams must not exceed %d.", groupSize));
+        } if (Arrays.stream(teams).map(Team::getName).distinct().count()
+                != teams.length) {
+            throw new IllegalArgumentException("Teams with duplicate names detected.");
         } if (numberOfLegs != 1 && numberOfLegs != 2) {
             throw new IllegalArgumentException("The number of legs must be either 1 or 2.");
         }
@@ -111,6 +111,13 @@ public abstract class Group {
         }
     }
 
+    /**
+     * Takes the name of a team and return a clone of the Team object associated with it,
+     * if a team of the given name exists in the group.
+     *
+     * @param teamName The name of a team.
+     * @throws IllegalArgumentException If no team of the given name is in the group.
+     */
     public Team getTeamByName(String teamName) throws IllegalArgumentException {
         Optional<Team> matchingTeam = Arrays.stream(teams).filter(t -> t.getName().equals(teamName)).findFirst();
         if (matchingTeam.isPresent()) {
@@ -152,7 +159,7 @@ public abstract class Group {
      * Sorts the group's teams from highest ranked to lowest ranked
      * depending on the competition's ranking system.
      */
-    public void sortTeams() {
+    private void sortTeams() {
         Arrays.sort(teams, (team1, team2) -> compareTeams(team2, team1));
         // indices start at 0 so add 1 to get the position
         IntStream.range(0, teams.length).forEach(i -> {
@@ -203,6 +210,13 @@ public abstract class Group {
                 .allMatch(n -> n == (teams.length-1)*numberOfLegs);
     }
 
+    /**
+     * Takes the name of a team and returns a string displaying its position, name, number of matches played,
+     * number of matches won, number of matches drawn, number of matches lost, number of goals scored,
+     * number of goals conceded, goal difference and number of points.
+     *
+     * @return information about the team.
+     */
     public String getTableRowByTeamName(String teamName) {
         Team team = getTeamByName(teamName);
         return String.format("%d: %s, Pld: %d, W: %d, D: %d, L: %d, GF: %d, GA: %d, GD: %s, Pts: %d",
