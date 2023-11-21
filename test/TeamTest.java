@@ -480,7 +480,19 @@ public class TeamTest {
     }
 
     @Test
-    public void testTeamToStringWithMatches() {
+    public void testTeamToStringWithMatchesOneLeg() {
+        TeamFactory factory = new TeamFactory();
+        Team germany = factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-4")));
+        germany.addMatches(
+                new Team.Match("Japan", "1-2"),
+                new Team.Match("Spain", "1-1"),
+                new Team.Match("Costa Rica", "4-2")
+        );
+        assertEquals("Team{name=Germany, matches={Match{opponentName=Japan, score=1-2, isAway=false}, Match{opponentName=Spain, score=1-1, isAway=false}, Match{opponentName=Costa Rica, score=4-2, isAway=false}}}", germany.toString());
+    }
+
+    @Test
+    public void testTeamToStringWithMatchesTwoLegs() {
         TeamFactory factory = new TeamFactory();
         Team team = factory.createTeam("Manchester City");
         team.addMatch("Chelsea", "4-4", false);
