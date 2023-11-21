@@ -495,6 +495,15 @@ public class GroupTest {
         assertEquals(8, pl.getTeamByName("Chelsea").getGoalsAgainst());
     }
 
+    @Test
+    public void testPldTwoLegged() {
+        PremierLeague pl = premierLeague();
+        pl.addMatch("Chelsea", "Manchester City", "2-1");
+        pl.addMatch("Arsenal", "Chelsea", "4-1");
+        pl.addMatch("Liverpool", "Chelsea", "4-5");
+        assertEquals(3, pl.getTeamByName("Chelsea").getNumberOfMatchesPlayed());
+    }
+
     // testing specific operations for groups exceptions
 
     @Test
