@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MatchTest {
@@ -39,6 +41,14 @@ public class MatchTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new Team.Match("Japan", "1-"));
         assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+    }
+
+    @Test
+    public void testConstructorCards() {
+        Team.Match match = new Team.Match("Japan", "3-2",
+                List.of(FIFAWorldCupGroup.Card.YELLOW), List.of(FIFAWorldCupGroup.Card.DIRECT_RED));
+        assertEquals(List.of(FIFAWorldCupGroup.Card.YELLOW), match.getSelfCards());
+        assertEquals(List.of(FIFAWorldCupGroup.Card.DIRECT_RED), match.getOpponentCards());
     }
 
     @Test

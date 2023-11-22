@@ -80,4 +80,23 @@ public class FIFAWorldCupGroup extends Group {
     protected FIFAWorldCupGroup createSubGroup(String teamName) {
         return createSubGroup(getTeamByName(teamName));
     }
+
+    enum Card implements CardEnum {
+
+        YELLOW(-1),
+        INDIRECT_RED(-3),
+        DIRECT_RED(-4),
+        YELLOW_AND_DIRECT_RED(-5);
+
+        private final int penalty;
+
+        Card(int penalty) {
+            this.penalty = penalty;
+        }
+
+        @Override
+        public int getPenalty() {
+            return penalty;
+        }
+    }
 }

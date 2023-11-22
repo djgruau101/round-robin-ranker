@@ -1,8 +1,4 @@
-import java.util.Collections;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -72,9 +68,14 @@ public class Team {
                 m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway == match.isAway)) {
             matches.stream()
                     .filter(m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway == match.isAway)
-                    .forEach(m -> m.setScore(match.getScore())); // update score of existing match
+                    .forEach(m -> {
+                        m.setScore(match.getScore());
+                        m.setSelfCards(match.getSelfCards());
+                        m.setOpponentCards(match.getOpponentCards());
+                    }); // update score and cards of existing match
         } else {
-            matches.add(new Match(match.getOpponentName(), match.getScore(), match.isAway()));
+            matches.add(new Match(match.getOpponentName(), match.getScore(),
+                    match.isAway(), match.getSelfCards(), match.getOpponentCards()));
         }
     }
 
@@ -96,6 +97,30 @@ public class Team {
         isPlayingAgainstItself = opponentName.equals(name);
         throwExceptionMessage();
         addMatch(new Match(opponentName, score, isAway));
+    }
+
+    /**
+     * Constructs a Match instance, adds it in the team's matches
+     * or updates the score of one of the team's existing matches.
+     *
+     * @param opponentName The name of a team that the team has played against.
+     * @param score The score of the match against said team.
+     *              It consists of two nonnegative integers separated by a '-'.
+     *              Its format is "goalsByThisTeam-goalsByRivalTeam".
+     * @param isAway Whether the match is an away match.
+     *               It will always be false if the tournament the competes in is single-legged.
+     * @param selfCards The list of penalty cards received by the team during the match.
+     * @param opponentCards The list of penalty cards received by the opponent during the match.
+     * @throws IllegalArgumentException If 'score' is not in the format indicated above
+     *                                  or 'opponentName' is equal to the team's name.
+     */
+    public void addMatch(String opponentName, String score,
+                         boolean isAway, List<Group.CardEnum> selfCards,
+                         List<Group.CardEnum> opponentCards) throws IllegalArgumentException {
+        scoreInvalid = Match.isScoreInvalid(score);
+        isPlayingAgainstItself = opponentName.equals(name);
+        throwExceptionMessage();
+        addMatch(new Match(opponentName, score, isAway, selfCards, opponentCards));
     }
 
     /**
@@ -229,6 +254,8 @@ public class Team {
         return this.getMatches().size();
     }
 
+
+
     /**
      * Returns whether some other object is "equal to" this team object.
      *
@@ -274,6 +301,15 @@ public class Team {
         return matches.parallelStream().filter(m -> m.isAway).mapToInt(Match::getGoalsScored).sum();
     }
 
+    public List<Group.CardEnum> getCards() {
+        return matches.parallelStream().map(Match::getSelfCards).flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    public int getFairPlayPoints() {
+        return matches.parallelStream().map(Match::getSelfCards)
+                .flatMap(List::stream).mapToInt(Group.CardEnum::getPenalty).sum();
+    }
+
     /**
      * Returns the name of the team.
      *
@@ -298,16 +334,21 @@ public class Team {
      * opponentName: the name of an opponent team.
      * score: the result of the match.
      * isAway: if the match is an away match in a double-legged tournament.
+     * selfCards: the list of penalty cards received by the team.
+     * opponentCards: the list of penalty cards received by the opponent.
      *
      * Each score is a string represented in the format "goalsByThisTeam-goalsByOpponent".
      * For example, a match with arguments "Real Madrid" and "3-1" represents a match
      * played against Real Madrid, where the team scored 3 goals and Real Madrid scored 1 goal.
+     * Penalty cards will only be considered for tie-breaking purposes.
      */
     static class Match {
 
         private final String opponentName;
         private String score;
         private final boolean isAway;
+        private List<Group.CardEnum> selfCards;
+        private List<Group.CardEnum> opponentCards;
 
         public Match(String opponentName, String score, boolean isAway) throws IllegalArgumentException {
             scoreInvalid = isScoreInvalid(score);
@@ -315,6 +356,8 @@ public class Team {
             this.opponentName = opponentName;
             this.score = score;
             this.isAway = isAway;
+            this.selfCards = List.of();
+            this.opponentCards = List.of();
         }
 
         public Match(String opponentName, String score) throws IllegalArgumentException {
@@ -323,6 +366,52 @@ public class Team {
             this.opponentName = opponentName;
             this.score = score;
             this.isAway = false;
+            this.selfCards = List.of();
+            this.opponentCards = List.of();
+        }
+
+        public Match(String opponentName, String score, boolean isAway, List<Group.CardEnum> selfCards,
+                     List<Group.CardEnum> opponentCards) throws IllegalArgumentException {
+            scoreInvalid = isScoreInvalid(score);
+            throwExceptionMessage();
+            this.opponentName = opponentName;
+            this.score = score;
+            this.isAway = isAway;
+            this.selfCards = selfCards;
+            this.opponentCards = opponentCards;
+        }
+
+        public Match(String opponentName, String score, List<Group.CardEnum> selfCards,
+                     List<Group.CardEnum> opponentCards) throws IllegalArgumentException {
+            scoreInvalid = isScoreInvalid(score);
+            throwExceptionMessage();
+            this.opponentName = opponentName;
+            this.score = score;
+            this.isAway = false;
+            this.selfCards = selfCards;
+            this.opponentCards = opponentCards;
+        }
+
+        public List<Group.CardEnum> getSelfCards() {
+            return new ArrayList<>(selfCards);
+        }
+
+        public void setSelfCards(List<Group.CardEnum> cards) {
+            if (cards == null) {
+                throw new IllegalArgumentException("cards cannot be null");
+            }
+            this.selfCards = List.copyOf(cards);
+        }
+
+        public List<Group.CardEnum> getOpponentCards() {
+            return new ArrayList<>(opponentCards);
+        }
+
+        public void setOpponentCards(List<Group.CardEnum> cards) {
+            if (cards == null) {
+                throw new IllegalArgumentException("cards cannot be null");
+            }
+            this.opponentCards = List.copyOf(cards);
         }
 
         /**
@@ -445,11 +534,13 @@ public class Team {
             if (obj == null || getClass() != obj.getClass()) return false;
             Match otherMatch = (Match) obj;
             return opponentName.equals(otherMatch.opponentName) &&
-                    score.equals(otherMatch.score) && (isAway == otherMatch.isAway);
+                    score.equals(otherMatch.score) && (isAway == otherMatch.isAway) &&
+                    selfCards.equals(otherMatch.selfCards) && opponentCards.equals(otherMatch.opponentCards);
         }
 
         public String toString() {
-            return String.format("Match{opponentName=%s, score=%s, isAway=%b}", opponentName, score, isAway);
+            return String.format("Match{opponentName=%s, score=%s, isAway=%b, selfCards=%s, opponentCards=%s}",
+                    opponentName, score, isAway, selfCards, opponentCards);
         }
 
         @Override

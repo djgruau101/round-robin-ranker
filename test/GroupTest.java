@@ -2,6 +2,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,12 +46,22 @@ public class GroupTest {
      */
     FIFAWorldCupGroup groupC2022Complete() {
         FIFAWorldCupGroup groupC2022 = groupC2022();
-        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
-        groupC2022.addMatch("Poland", "Mexico", "0-0");
-        groupC2022.addMatch("Poland", "Saudi Arabia", "2-0");
-        groupC2022.addMatch("Argentina", "Mexico", "2-0");
-        groupC2022.addMatch("Poland", "Argentina", "0-2");
-        groupC2022.addMatch("Saudi Arabia", "Mexico", "1-2");
+        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2",
+                List.of(), new ArrayList<>(Collections.nCopies(6, FIFAWorldCupGroup.Card.YELLOW)));
+        groupC2022.addMatch("Poland", "Mexico", "0-0",
+                List.of(FIFAWorldCupGroup.Card.YELLOW),
+                new ArrayList<>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)));
+        groupC2022.addMatch("Poland", "Saudi Arabia", "2-0",
+                new ArrayList<>(Collections.nCopies(3, FIFAWorldCupGroup.Card.YELLOW)),
+                new ArrayList<>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)));
+        groupC2022.addMatch("Argentina", "Mexico", "2-0",
+                List.of(FIFAWorldCupGroup.Card.YELLOW),
+                new ArrayList<>(Collections.nCopies(4, FIFAWorldCupGroup.Card.YELLOW)));
+        groupC2022.addMatch("Poland", "Argentina", "0-2",
+                List.of(FIFAWorldCupGroup.Card.YELLOW), List.of(FIFAWorldCupGroup.Card.YELLOW));
+        groupC2022.addMatch("Saudi Arabia", "Mexico", "1-2",
+                new ArrayList<>(Collections.nCopies(6, FIFAWorldCupGroup.Card.YELLOW)),
+                List.of(FIFAWorldCupGroup.Card.YELLOW));
         return groupC2022;
     }
 
@@ -274,6 +287,15 @@ public class GroupTest {
                 pl.getTeamByName("Chelsea").getMatches());
     }
 
+    @Test
+    public void testGetFairPlayPoints() {
+        FIFAWorldCupGroup groupC2022 = groupC2022Complete();
+        assertEquals(-2, groupC2022.getTeamByName("Argentina").getFairPlayPoints());
+        assertEquals(-5, groupC2022.getTeamByName("Poland").getFairPlayPoints());
+        assertEquals(-7, groupC2022.getTeamByName("Mexico").getFairPlayPoints());
+        assertEquals(-14, groupC2022.getTeamByName("Saudi Arabia").getFairPlayPoints());
+    }
+
     // test removing matches
 
     @Test
@@ -296,39 +318,29 @@ public class GroupTest {
     @Test
     public void testGroupRemoveMatchOneLeg() {
         Group groupC2022 = groupC2022Complete();
-        groupC2022.removeMatch("Argentina", "Poland");
-        groupC2022.removeMatch("Mexico", "Saudi Arabia");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
-                new Team.Match("Mexico", "2-0")),
+        groupC2022.removeMatch("Argentina", "Mexico");
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2",
+                        List.of(), new ArrayList<>(Collections.nCopies(6, FIFAWorldCupGroup.Card.YELLOW))),
+                new Team.Match("Poland", "2-0", List.of(FIFAWorldCupGroup.Card.YELLOW),
+                        List.of(FIFAWorldCupGroup.Card.YELLOW))),
                 groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Poland", "0-2"),
-                new Team.Match("Argentina", "2-1")),
-                groupC2022.getTeamByName("Saudi Arabia").getMatches());
-        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
-                new Team.Match("Saudi Arabia", "2-0")),
-                groupC2022.getTeamByName("Poland").getMatches());
-        assertEquals(Set.of(new Team.Match("Poland", "0-0"),
-                new Team.Match("Argentina", "0-2")),
-                groupC2022.getTeamByName("Mexico").getMatches());
     }
 
     @Test
     public void testGroupRemoveMatchTwiceOneLeg() {
         Group groupC2022 = groupC2022Complete();
         groupC2022.removeMatch("Argentina", "Poland");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
-                new Team.Match("Mexico", "2-0")),
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2",
+                        List.of(), new ArrayList<>(Collections.nCopies(6, FIFAWorldCupGroup.Card.YELLOW))),
+                new Team.Match("Mexico", "2-0", List.of(FIFAWorldCupGroup.Card.YELLOW),
+                        new ArrayList<>(Collections.nCopies(4, FIFAWorldCupGroup.Card.YELLOW)))),
                 groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
-                new Team.Match("Saudi Arabia", "2-0")),
-                groupC2022.getTeamByName("Poland").getMatches());
         groupC2022.removeMatch("Argentina", "Poland");
-        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2"),
-                new Team.Match("Mexico", "2-0")),
+        assertEquals(Set.of(new Team.Match("Saudi Arabia", "1-2",
+                        List.of(), new ArrayList<>(Collections.nCopies(6, FIFAWorldCupGroup.Card.YELLOW))),
+                new Team.Match("Mexico", "2-0", List.of(FIFAWorldCupGroup.Card.YELLOW),
+                        new ArrayList<>(Collections.nCopies(4, FIFAWorldCupGroup.Card.YELLOW)))),
                 groupC2022.getTeamByName("Argentina").getMatches());
-        assertEquals(Set.of(new Team.Match("Mexico", "0-0"),
-                new Team.Match("Saudi Arabia", "2-0")),
-                groupC2022.getTeamByName("Poland").getMatches());
     }
 
     @Test

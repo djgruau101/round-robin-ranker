@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
  *
  * For groups where numberOfLegs = 2, each team's 'matches' field
  * will solely contain the team's games that are played at home.
- * The away goals rule may apply for tiebreaking purposes depending on the competition.
+ * The away goals rule may apply for tie-breaking purposes depending on the competition.
  */
 public abstract class Group {
 
@@ -65,12 +65,18 @@ public abstract class Group {
      *
      * @param team1Name The name of the first team. If the tournament is double-legged, this is the home team.
      * @param team2Name The name of the second team. If the tournament is double-legged, this is the away team.
+     * @param score The score of the match. Each number is the number of goals scored by team1 and team2 respectively.
      * @throws IllegalArgumentException If at least one of the teams' name does not correspond to a team in the group,
      *                                  'opponentName' is equal to the team's name,
      *                                  or the match's score is not expressed in the following format:
      *                                  two nonnegative integers separated by a '-'.
      */
-    public void addMatch(String team1Name, String team2Name, String score) throws IllegalArgumentException {
+    public void addMatch(String team1Name, String team2Name, String score,
+                         List<Group.CardEnum> team1Cards,
+                         List<Group.CardEnum> team2Cards) throws IllegalArgumentException {
+        if (team1Cards == null || team2Cards == null) {
+            throw new IllegalArgumentException("List of cards can not be null.");
+        }
         String errorMessage = ""; // error message for scoreInvalid and/or isPlayingAgainstItself
         if (Team.Match.isScoreInvalid(score)) {
             errorMessage += "The score must be two nonnegative integers separated by '-'.\n";
@@ -87,14 +93,19 @@ public abstract class Group {
         if (matchingTeam1.isPresent() && matchingTeam2.isPresent()) {
             Team team1 = matchingTeam1.get();
             Team team2 = matchingTeam2.get();
-            Team.Match newHomeMatch = new Team.Match(team2Name, score, false);
+            Team.Match newHomeMatch = new Team.Match(team2Name, score, false, team1Cards, team2Cards);
             team1.addMatch(newHomeMatch);
             // if there are two legs, the awayTeam gets the match added to its awayMatches
-            team2.addMatch(team1.getName(), newHomeMatch.getReversedScore(), numberOfLegs == 2);
+            team2.addMatch(team1.getName(), newHomeMatch.getReversedScore(),
+                    numberOfLegs == 2, team2Cards, team1Cards);
             sortTeams(); // update the team positions
         } else {
             throw new IllegalArgumentException("Team names must be among the ones in the group.");
         }
+    }
+
+    public void addMatch(String team1Name, String team2Name, String score) {
+        addMatch(team1Name, team2Name, score, List.of(), List.of());
     }
 
     /**
@@ -284,5 +295,9 @@ public abstract class Group {
                 getTeamPositionByName(teamName), teamName, team.getNumberOfMatchesPlayed(),
                 team.getNumberWins(), team.getNumberDraws(), team.getNumberLosses(), team.getGoalsFor(),
                 team.getGoalsAgainst(), team.getGoalDifferenceToString(), team.getPoints());
+    }
+
+    interface CardEnum {
+        int getPenalty();
     }
 }

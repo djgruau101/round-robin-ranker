@@ -54,4 +54,23 @@ public class PremierLeague extends Group {
     protected Group createSubGroup(Team team) {
         return new PremierLeague(new Team[]{team}); // to be implemented
     }
+
+    private enum Card implements CardEnum {
+
+        YELLOW(0),
+        INDIRECT_RED(0),
+        DIRECT_RED(0),
+        YELLOW_AND_DIRECT_RED(0);
+
+        private final int penalty;
+
+        Card(int penalty) {
+            this.penalty = penalty;
+        }
+
+        @Override
+        public int getPenalty() {
+            return penalty;
+        }
+    }
 }

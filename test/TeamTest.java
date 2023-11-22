@@ -2,6 +2,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -394,6 +397,33 @@ public class TeamTest {
                 new Team.Match("Mexico", "1-2"),
                 new Team.Match("Poland", "0-2"));
         assertEquals(3, saudiArabia.getNumberOfMatchesPlayed());
+    }
+
+    @Test
+    public void testGetCardsSimple() {
+        TeamFactory factory = new TeamFactory();
+        Team wales = factory.createTeam("Wales");
+        wales.addMatch(new Team.Match("United States", "1-1", List.of(FIFAWorldCupGroup.Card.YELLOW, FIFAWorldCupGroup.Card.YELLOW), List.of()));
+        assertEquals(Set.of(new Team.Match("United States", "1-1", List.of(FIFAWorldCupGroup.Card.YELLOW, FIFAWorldCupGroup.Card.YELLOW), List.of())), wales.getMatches());
+        assertEquals(List.of(FIFAWorldCupGroup.Card.YELLOW, FIFAWorldCupGroup.Card.YELLOW), wales.getCards());
+    }
+
+    @Test
+    public void testGetFairPlayPoints() {
+        // Wales during the 2022 World Cup
+        TeamFactory factory = new TeamFactory();
+        Team wales = factory.createTeam("Wales");
+        wales.addMatches(
+                new Team.Match("United States", "1-1",
+                        new ArrayList<Group.CardEnum>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)),
+                        new ArrayList<Group.CardEnum>(Collections.nCopies(4, FIFAWorldCupGroup.Card.YELLOW))),
+                new Team.Match("Poland", "0-2",
+                        List.of(FIFAWorldCupGroup.Card.YELLOW, FIFAWorldCupGroup.Card.DIRECT_RED),
+                        new ArrayList<Group.CardEnum>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW))),
+                new Team.Match("England", "0-3",
+                        new ArrayList<Group.CardEnum>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)),
+                        List.of()));
+        assertEquals(-9, wales.getFairPlayPoints());
     }
 
     // testing equality between teams
