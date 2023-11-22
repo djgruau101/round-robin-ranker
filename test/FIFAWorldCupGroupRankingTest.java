@@ -2,8 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FIFAWorldCupGroupRankingTest {
 
@@ -38,6 +37,15 @@ public class FIFAWorldCupGroupRankingTest {
                 groupA2022.getTableRowByTeamName("Ecuador"));
         assertEquals("4: Qatar, Pld: 3, W: 0, D: 0, L: 3, GF: 1, GA: 7, GD: -6, Pts: 0",
                 groupA2022.getTableRowByTeamName("Qatar"));
+    }
+
+    @Test
+    public void testIdenticalTeamError() {
+        Group group = createGroup("Argentina", "Saudi Arabia", "Poland", "Mexico");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> group.compareTeams(group.getTeamByName("Argentina"),
+                        group.getTeamByName("Argentina")));
+        assertEquals("Can not compare two identical teams.", exception.getMessage());
     }
 
     @Test

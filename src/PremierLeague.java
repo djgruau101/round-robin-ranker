@@ -24,7 +24,10 @@ public class PremierLeague extends Group {
      * @param team2 A football team that team1 is compared to.
      *
      * @return A positive integer if team1 is ranked above team2,
-     *         a negative integer if team2 is ranked above team1.
+     *         a negative integer if team2 is ranked above team1,
+     *         or 0 if both teams are equal and their equality does not determine
+     *         the League Champion, clubs to be relegated, or clubs qualifying
+     *         to other competitions amongst tied clubs.
      */
     @Override
     public int compareTeams(Team team1, Team team2) {
@@ -52,11 +55,13 @@ public class PremierLeague extends Group {
 
     @Override
     protected Group createSubGroup(Team team) {
-        return new PremierLeague(new Team[]{team}); // to be implemented
+        Team[] headToHeadTeams = this.getTeamNames().parallelStream()
+                .map(this::getTeamByName).filter(t -> compareTeamsBeforeHeadToHead(team, t) == 0).toArray(Team[]::new);
+        return new PremierLeague(headToHeadTeams);
     }
 
-    private enum Card implements CardEnum {
-
+    enum Card implements CardEnum {
+        // fair play points are not used to break ties in the Premier League
         YELLOW(0),
         INDIRECT_RED(0),
         DIRECT_RED(0),

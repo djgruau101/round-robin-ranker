@@ -42,13 +42,14 @@ public class FIFAWorldCupGroup extends Group {
         if (resultBeforeHeadToHead != 0) {
             return resultBeforeHeadToHead;
         }
-        FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1); // compare head-to-head record
+        // compare head-to-head record
+        FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
         int resultDuringHeadToHead = headToHeadGroup.compareTeamsBeforeHeadToHead(
                 headToHeadGroup.getTeamByName(team1.getName()), headToHeadGroup.getTeamByName(team2.getName()));
         if (resultDuringHeadToHead != 0) {
             return resultDuringHeadToHead;
         }
-        // disciplinary record
+        // compare disciplinary record
         if (team1.getFairPlayPoints() != team2.getFairPlayPoints()) {
             return Integer.compare(team1.getFairPlayPoints(), team2.getFairPlayPoints());
         }
