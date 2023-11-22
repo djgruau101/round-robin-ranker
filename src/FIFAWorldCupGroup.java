@@ -31,15 +31,24 @@ public class FIFAWorldCupGroup extends Group {
      *
      * @return A positive integer if team1 is ranked above team2,
      *         a negative integer if team2 is ranked above team1.
+     * @throws IllegalArgumentException If team1 and team2 are identical.
      */
     @Override
-    public int compareTeams(Team team1, Team team2) {
+    public int compareTeams(Team team1, Team team2) throws IllegalArgumentException {
+        if (team1.equals(team2)) {
+            throw new IllegalArgumentException("Can not compare two identical teams.");
+        }
         int resultBeforeHeadToHead = compareTeamsBeforeHeadToHead(team1, team2);
         if (resultBeforeHeadToHead != 0) {
             return resultBeforeHeadToHead;
         }
         // compare head-to-head record
         FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
+        int resultDuringHeadToHead = headToHeadGroup.compareTeamsBeforeHeadToHead(
+                headToHeadGroup.getTeamByName(team1.getName()), headToHeadGroup.getTeamByName(team2.getName()));
+        if (resultDuringHeadToHead != 0) {
+            return resultDuringHeadToHead;
+        }
 
         // disciplinary record
 
@@ -62,7 +71,13 @@ public class FIFAWorldCupGroup extends Group {
 
     @Override
     protected FIFAWorldCupGroup createSubGroup(Team team) {
+        Team[] headToHeadTeams = this.getTeamNames().parallelStream()
+                .map(this::getTeamByName).filter(t -> compareTeamsBeforeHeadToHead(team, t) == 0).toArray(Team[]::new);
+        return new FIFAWorldCupGroup(headToHeadTeams);
+    }
 
-        return new FIFAWorldCupGroup(new Team[]{team}); // to be implemented
+    @Override
+    protected FIFAWorldCupGroup createSubGroup(String teamName) {
+        return createSubGroup(getTeamByName(teamName));
     }
 }

@@ -1,8 +1,10 @@
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FIFAWorldCupGroupRankingTest {
 
@@ -90,14 +92,29 @@ public class FIFAWorldCupGroupRankingTest {
         groupH2018Adapted.addMatch("Japan", "Poland", "0-1");
         groupH2018Adapted.addMatch("Senegal", "Colombia", "0-1");
 
-        // Japan 6, Senegal 3, Poland 3, Colombia 6
-        // Japan +3, Senegal -3, Poland -3, Colombia +3
+        // Pts: Japan 6, Senegal 3, Poland 3, Colombia 6
+        // GD: Japan +3, Senegal -3, Poland -3, Colombia +3
         // GF: Japan 7, Senegal 4, Poland 4, Colombia 7
 
-        assertEquals("1: Colombia, Pld: 3, W: 2, D: 0, L: 1, GF: 7, GA: 4, GD: +3, Pts: 6",
-                groupH2018Adapted.getTableRowByTeamName("Colombia"));
-        assertEquals("2: Japan, Pld: 3, W: 2, D: 0, L: 1, GF: 7, GA: 4, GD: +3, Pts: 6",
+        FIFAWorldCupGroup subGroup = groupH2018Adapted.createSubGroup("Japan");
+        assertEquals(Set.of("Japan", "Colombia"), subGroup.getTeamNames());
+        assertEquals(Set.of(new Team.Match("Japan", "1-2")),
+                subGroup.getTeamByName("Colombia").getMatches());
+        assertEquals(Set.of(new Team.Match("Colombia", "2-1")),
+                subGroup.getTeamByName("Japan").getMatches());
+        assertEquals(0, subGroup.getTeamByName("Colombia").getPoints());
+        assertEquals(3, subGroup.getTeamByName("Japan").getPoints());
+        assertTrue(subGroup.compareTeamsBeforeHeadToHead(
+                subGroup.getTeamByName("Japan"), subGroup.getTeamByName("Colombia")) > 0);
+
+        assertTrue(groupH2018Adapted.compareTeams("Japan", "Colombia") > 0);
+        assertTrue(groupH2018Adapted.compareTeams("Colombia", "Senegal") > 0);
+        assertTrue(groupH2018Adapted.compareTeams("Senegal", "Poland") > 0);
+
+        assertEquals("1: Japan, Pld: 3, W: 2, D: 0, L: 1, GF: 7, GA: 4, GD: +3, Pts: 6",
                 groupH2018Adapted.getTableRowByTeamName("Japan"));
+        assertEquals("2: Colombia, Pld: 3, W: 2, D: 0, L: 1, GF: 7, GA: 4, GD: +3, Pts: 6",
+                groupH2018Adapted.getTableRowByTeamName("Colombia"));
         assertEquals("3: Senegal, Pld: 3, W: 1, D: 0, L: 2, GF: 4, GA: 7, GD: -3, Pts: 3",
                 groupH2018Adapted.getTableRowByTeamName("Senegal"));
         assertEquals("4: Poland, Pld: 3, W: 1, D: 0, L: 2, GF: 4, GA: 7, GD: -3, Pts: 3",

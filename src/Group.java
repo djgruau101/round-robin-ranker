@@ -159,9 +159,11 @@ public abstract class Group {
      *              If the tournament is double-legged, this is the away team.
      *
      * @return A positive integer if team1 is ranked above team2,
-     *         a negative integer if team2 is ranked above team1.
+     *         a negative integer if team2 is ranked above team1,
+     *         or 0 if both teams are equally ranked (cases were equal ranking does not matter).
+     * @throws IllegalArgumentException If team1 and team2 are identical.
      */
-    public abstract int compareTeams(Team team1, Team team2);
+    public abstract int compareTeams(Team team1, Team team2) throws IllegalArgumentException;
 
     /**
      * An overloaded method for compareTeams where the input is two team names instead of two Team objects.
@@ -197,9 +199,22 @@ public abstract class Group {
      * Takes a team from the group and returns a group only consisting of itself and the
      * teams that are tied with it on all criteria before applying the head-to-head record.
      *
+     * @param team A team in the group to be compared to other teams in the group.
      * @return A group of tied teams.
      */
     protected abstract Group createSubGroup(Team team);
+
+    /**
+     * Takes a team from the group and returns a group only consisting of itself and the
+     * teams that are tied with it on all criteria before applying the head-to-head record.
+     *
+     * @param teamName The name of a team in the group to be compared to other teams in the group.
+     * @return A group of tied teams.
+     */
+    protected Group createSubGroup(String teamName) {
+        Team team = getTeamByName(teamName);
+        return createSubGroup(team);
+    }
 
     /**
      * Sorts the group's teams from highest ranked to lowest ranked
