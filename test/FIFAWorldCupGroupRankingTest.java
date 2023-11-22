@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -119,5 +118,39 @@ public class FIFAWorldCupGroupRankingTest {
                 groupH2018Adapted.getTableRowByTeamName("Senegal"));
         assertEquals("4: Poland, Pld: 3, W: 1, D: 0, L: 2, GF: 4, GA: 7, GD: -3, Pts: 3",
                 groupH2018Adapted.getTableRowByTeamName("Poland"));
+    }
+
+    @Test
+    public void testDifferentFairPlayPoints() {
+        // Russia 2018 Group H: Japan and Senegal tied on points,
+        // GD, GF, head-to-head record, but not on fair play points
+        FIFAWorldCupGroup groupH2018 = createGroup("Senegal", "Japan", "Poland", "Colombia");
+        groupH2018.addMatch("Colombia", "Japan", "1-2",
+                List.of(FIFAWorldCupGroup.Card.DIRECT_RED, FIFAWorldCupGroup.Card.YELLOW, FIFAWorldCupGroup.Card.YELLOW),
+                List.of(FIFAWorldCupGroup.Card.YELLOW));
+        groupH2018.addMatch("Poland", "Senegal", "1-2",
+                List.of(FIFAWorldCupGroup.Card.YELLOW),
+                new ArrayList<>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)));
+        groupH2018.addMatch("Japan", "Senegal", "2-2",
+                new ArrayList<>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)),
+                new ArrayList<>(Collections.nCopies(3, FIFAWorldCupGroup.Card.YELLOW)));
+        groupH2018.addMatch("Poland", "Colombia", "0-3",
+                new ArrayList<>(Collections.nCopies(2, FIFAWorldCupGroup.Card.YELLOW)), List.of());
+        groupH2018.addMatch("Japan", "Poland", "0-1",
+                List.of(FIFAWorldCupGroup.Card.YELLOW), List.of());
+        groupH2018.addMatch("Senegal", "Colombia", "0-1",
+                List.of(FIFAWorldCupGroup.Card.YELLOW), List.of(FIFAWorldCupGroup.Card.YELLOW));
+        assertEquals(-3, groupH2018.getTeamByName("Poland").getFairPlayPoints());
+        assertEquals(-4, groupH2018.getTeamByName("Japan").getFairPlayPoints());
+        assertEquals(-6, groupH2018.getTeamByName("Senegal").getFairPlayPoints());
+        assertEquals(-7, groupH2018.getTeamByName("Colombia").getFairPlayPoints());
+        assertEquals("1: Colombia, Pld: 3, W: 2, D: 0, L: 1, GF: 5, GA: 2, GD: +3, Pts: 6",
+                groupH2018.getTableRowByTeamName("Colombia"));
+        assertEquals("2: Japan, Pld: 3, W: 1, D: 1, L: 1, GF: 4, GA: 4, GD: 0, Pts: 4",
+                groupH2018.getTableRowByTeamName("Japan"));
+        assertEquals("3: Senegal, Pld: 3, W: 1, D: 1, L: 1, GF: 4, GA: 4, GD: 0, Pts: 4",
+                groupH2018.getTableRowByTeamName("Senegal"));
+        assertEquals("4: Poland, Pld: 3, W: 1, D: 0, L: 2, GF: 2, GA: 5, GD: -3, Pts: 3",
+                groupH2018.getTableRowByTeamName("Poland"));
     }
 }

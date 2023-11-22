@@ -1,4 +1,4 @@
-
+import java.util.Random;
 
 public class FIFAWorldCupGroup extends Group {
 
@@ -42,19 +42,20 @@ public class FIFAWorldCupGroup extends Group {
         if (resultBeforeHeadToHead != 0) {
             return resultBeforeHeadToHead;
         }
-        // compare head-to-head record
-        FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
+        FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1); // compare head-to-head record
         int resultDuringHeadToHead = headToHeadGroup.compareTeamsBeforeHeadToHead(
                 headToHeadGroup.getTeamByName(team1.getName()), headToHeadGroup.getTeamByName(team2.getName()));
         if (resultDuringHeadToHead != 0) {
             return resultDuringHeadToHead;
         }
-
         // disciplinary record
-
+        if (team1.getFairPlayPoints() != team2.getFairPlayPoints()) {
+            return Integer.compare(team1.getFairPlayPoints(), team2.getFairPlayPoints());
+        }
         // drawing of lots
-
-        return 0; // partial implementation for now
+        Random random = new Random();
+        int randomValue = random.nextInt(2); // will be either 0 or 1
+        return (randomValue == 0) ? -1 : 1;
     }
 
     @Override
