@@ -299,7 +299,7 @@ public class TeamTest {
     }
 
     @Test
-    public void testGetPointsDeduct() {
+    public void testGetPointsDeductConstructor() {
         // initialize instance with 1 match, then add 2 matches
         TeamFactory factory = new TeamFactory();
         Team argentina = factory.createTeam("Argentina",
@@ -307,6 +307,32 @@ public class TeamTest {
         argentina.addMatch("Mexico", "2-0", false);
         argentina.addMatch("Poland", "2-0", false);
         assertEquals(3, argentina.getPoints());
+    }
+
+    @Test
+    public void testGetPointsDeductPoints() {
+        // initialize instance with 1 match, then add 2 matches
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina",
+                Set.of(new Team.Match("Saudi Arabia", "1-2")));
+        argentina.addMatch("Mexico", "2-0", false);
+        argentina.addMatch("Poland", "2-0", false);
+        argentina.deductPoints(3);
+        argentina.deductPoints(1);
+        assertEquals(2, argentina.getPoints());
+    }
+
+    @Test
+    public void testGetPointsSetDeductedPoints() {
+        // initialize instance with 1 match, then add 2 matches
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina",
+                Set.of(new Team.Match("Saudi Arabia", "1-2")));
+        argentina.addMatch("Mexico", "2-0", false);
+        argentina.addMatch("Poland", "2-0", false);
+        argentina.setDeductedPoints(4);
+        argentina.setDeductedPoints(1);
+        assertEquals(5, argentina.getPoints());
     }
 
     // testing calculations of GF, GA, GD, Pld
@@ -529,7 +555,8 @@ public class TeamTest {
                 new Team.Match("Spain", "1-1"),
                 new Team.Match("Costa Rica", "4-2")
         );
-        assertEquals("Team{name=Germany, matches={Match{opponentName=Japan, score=1-2, isAway=false}, Match{opponentName=Spain, score=1-1, isAway=false}, Match{opponentName=Costa Rica, score=4-2, isAway=false}}}", germany.toString());
+        assertEquals("Team{name=Germany, matches={Match{opponentName=Japan, score=1-2, isAway=false, selfCards=[], opponentCards=[]}, Match{opponentName=Spain, score=1-1, isAway=false, selfCards=[], opponentCards=[]}, Match{opponentName=Costa Rica, score=4-2, isAway=false, selfCards=[], opponentCards=[]}}}",
+                germany.toString());
     }
 
     @Test
@@ -538,6 +565,6 @@ public class TeamTest {
         Team team = factory.createTeam("Manchester City");
         team.addMatch("Chelsea", "4-4", false);
         team.addMatch("Arsenal", "0-1", true);
-        assertEquals("Team{name=Manchester City, matches={Match{opponentName=Chelsea, score=4-4, isAway=false}, Match{opponentName=Arsenal, score=0-1, isAway=true}}}", team.toString());
+        assertEquals("Team{name=Manchester City, matches={Match{opponentName=Chelsea, score=4-4, isAway=false, selfCards=[], opponentCards=[]}, Match{opponentName=Arsenal, score=0-1, isAway=true, selfCards=[], opponentCards=[]}}}", team.toString());
     }
 }
