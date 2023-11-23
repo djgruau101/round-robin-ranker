@@ -86,4 +86,49 @@ public class TeamFactory {
             return newTeam;
         }
     }
+
+    /**
+     * Creates an instance of the Team class if teamRegistry does not contain the given team name,
+     * and sets its matches to the given 'matches' set.
+     * Otherwise, return the Team instance from teamRegistry that has the given team name.
+     *
+     * This method ensures uniqueness of all Team instances, that is, all instances have different names.
+     *
+     * @param name A team name.
+     * @param matches A set containing the matches the team has played.
+     * @return A Team instance.
+     */
+    public Team createTeam(String name, Set<Team.Match> matches, int deductedPoints) {
+        if (teamRegistry.containsKey(name)) {
+            // If a team with the same name already exists, return it
+            return teamRegistry.get(name);
+        } else {
+            // Otherwise, create a new team, register it, and return
+            Team newTeam = Team.createInstance(name, matches, deductedPoints);
+            teamRegistry.put(name, newTeam);
+            return newTeam;
+        }
+    }
+
+    /**
+     * Creates an instance of the Team class if teamRegistry does not contain the given team name,
+     * and sets its matches to an empty set.
+     * Otherwise, return the Team instance from teamRegistry that has the given team name.
+     *
+     * This method ensures uniqueness of all Team instances, that is, all instances have different names.
+     *
+     * @param name A team name.
+     * @return A Team instance.
+     */
+    public Team createTeam(String name, int pointsDeducted) {
+        if (teamRegistry.containsKey(name)) {
+            // If a team with the same name already exists, return it
+            return teamRegistry.get(name);
+        } else {
+            // Otherwise, create a new team, register it, and return
+            Team newTeam = Team.createInstance(name, pointsDeducted); // We don't need to care about matches
+            teamRegistry.put(name, newTeam);
+            return newTeam;
+        }
+    }
 }

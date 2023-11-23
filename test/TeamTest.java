@@ -298,6 +298,17 @@ public class TeamTest {
         assertEquals(6, argentina.getPoints());
     }
 
+    @Test
+    public void testGetPointsDeduct() {
+        // initialize instance with 1 match, then add 2 matches
+        TeamFactory factory = new TeamFactory();
+        Team argentina = factory.createTeam("Argentina",
+                Set.of(new Team.Match("Saudi Arabia", "1-2")), 3);
+        argentina.addMatch("Mexico", "2-0", false);
+        argentina.addMatch("Poland", "2-0", false);
+        assertEquals(3, argentina.getPoints());
+    }
+
     // testing calculations of GF, GA, GD, Pld
 
     @Test

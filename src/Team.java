@@ -4,13 +4,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * The Team class represents a football team competing in a round-robin tournament
- * and maintains a record of matches it played against other teams.
+ * The Team class represents a football team competing in a round-robin tournament,
+ * maintains a record of matches it played against other teams and stores the
+ * amount of points deducted from the team due to policy violations.
  *
  * Attributes:
  * name: the name of the team.
  * matches: a set of matches, each of them specifying a rival team,
  *          the score and whether it is a home or away match.
+ * deductedPoints: the amount of points deducted from the team
+ *                 due to policy violations.
  *
  * Usage:
  * The Team class provides functionality for adding and removing match data
@@ -33,6 +36,7 @@ public class Team {
 
     private final String name;
     private Set<Match> matches = new HashSet<>();
+    private int deductedPoints;
 
     private static boolean scoreInvalid = false;
     private static boolean isPlayingAgainstItself = false;
@@ -45,11 +49,33 @@ public class Team {
     private Team(String name, Set<Match> matches) {
         this.name = name;
         this.matches.addAll(matches);
+        this.deductedPoints = 0;
     }
 
     private Team(String name) {
         this.name = name;
         this.matches = new HashSet<>();
+        this.deductedPoints = 0;
+    }
+
+    private Team(String name, Set<Match> matches, int deductedPoints) {
+        this.name = name;
+        this.matches.addAll(matches);
+        if (deductedPoints >= 0) {
+            this.deductedPoints = deductedPoints;
+        } else {
+            throw new IllegalArgumentException("Deducted points must be nonnegative.");
+        }
+    }
+
+    private Team(String name, int deductedPoints){
+        this.name = name;
+        this.matches = new HashSet<>();
+        if (deductedPoints >= 0) {
+            this.deductedPoints = deductedPoints;
+        } else {
+            throw new IllegalArgumentException("Deducted points must be nonnegative.");
+        }
     }
 
     /**
@@ -151,6 +177,14 @@ public class Team {
         matches.removeIf(match -> match.getOpponentName().equals(opponentName) && match.isAway == isAway);
     }
 
+    public void deductPoints(int points) {
+        this.deductedPoints += points;
+    }
+
+    public void setDeductedPoints(int points) {
+        this.deductedPoints = points;
+    }
+
     /**
      * Returns the set of matches that the team has played.
      *
@@ -202,7 +236,7 @@ public class Team {
      */
     public int getPoints() {
         return this.getMatches().parallelStream().map(match -> match.getOutcome().getPoints())
-                .mapToInt(Integer::intValue).sum();
+                .mapToInt(Integer::intValue).sum() - this.deductedPoints;
     }
 
     /**
@@ -559,7 +593,7 @@ public class Team {
      * @throws IllegalArgumentException If at least one score from the matches is incorrectly formatted
      *                                  or at least one match's opponent name is identical to the team's name.
      */
-    public static Team createInstance(String name, Set<Match> matches) throws IllegalArgumentException{
+    static Team createInstance(String name, Set<Match> matches) throws IllegalArgumentException{
         scoreInvalid = matches.parallelStream().map(Match::getScore).anyMatch(Match::isScoreInvalid);
         isPlayingAgainstItself = matches.parallelStream().map(Match::getOpponentName).anyMatch(n -> n.equals(name));
         throwExceptionMessage();
@@ -575,6 +609,34 @@ public class Team {
      */
     static Team createInstance(String name) {
         return new Team(name);
+    }
+
+    /**
+     * Creates an instance of type Team and sets its matches according to the 'matches' input.
+     * This method will be called by the TeamFactory class to ensure uniqueness of all Team instances.
+     *
+     * @param name The name of the instance.
+     * @param matches The set of matches that the team has played.
+     * @return A new Team instance with its name and matches correctly set.
+     * @throws IllegalArgumentException If at least one score from the matches is incorrectly formatted
+     *                                  or at least one match's opponent name is identical to the team's name.
+     */
+    static Team createInstance(String name, Set<Match> matches, int pointsDeducted) throws IllegalArgumentException{
+        scoreInvalid = matches.parallelStream().map(Match::getScore).anyMatch(Match::isScoreInvalid);
+        isPlayingAgainstItself = matches.parallelStream().map(Match::getOpponentName).anyMatch(n -> n.equals(name));
+        throwExceptionMessage();
+        return new Team(name, matches, pointsDeducted);
+    }
+
+    /**
+     * Creates an instance of type Team and sets its matches to an empty set.
+     * This method will be called by the TeamFactory class to ensure uniqueness of all Team instances.
+     *
+     * @param name The name of the instance.
+     * @return The new Team instance.
+     */
+    static Team createInstance(String name, int pointsDeducted) {
+        return new Team(name, pointsDeducted);
     }
 
     /**

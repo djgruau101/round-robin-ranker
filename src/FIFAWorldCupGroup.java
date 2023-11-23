@@ -59,6 +59,20 @@ public class FIFAWorldCupGroup extends Group {
         return (randomValue == 0) ? -1 : 1;
     }
 
+    /**
+     * How the FIFA World Cup group stage ranking system breaks ties before looking at head-to-head record:
+     *
+     * 1. Points earned in all group matches (Pts)
+     * 2. Goal difference in all group matches (GD)
+     * 3. Number of goals scored in all group matches (GF)
+     *
+     * @param team1 A football team.
+     * @param team2 A football team that team1 is compared to.
+     *
+     * @return A positive integer if team1 is ranked above team2,
+     *         a negative integer if team2 is ranked above team1,
+     *         or 0 if team1 is tied with team2.
+     */
     @Override
     protected int compareTeamsBeforeHeadToHead(Team team1, Team team2) {
         if (team1.getPoints() != team2.getPoints()) {
