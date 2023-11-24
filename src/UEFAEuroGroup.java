@@ -44,6 +44,7 @@ public class UEFAEuroGroup extends Group {
         if (team1.getGoalsFor() != team2.getGoalsFor()) {
             return Integer.compare(team1.getGoalsFor(), team2.getGoalsFor());
         }
+        // will proceed there only if point deductions occur
         if (team1.getNumberWins() != team2.getNumberWins()) {
             return Integer.compare(team1.getNumberWins(), team2.getNumberWins());
         }
