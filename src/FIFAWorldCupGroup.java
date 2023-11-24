@@ -43,11 +43,13 @@ public class FIFAWorldCupGroup extends Group {
             return resultBeforeHeadToHead;
         }
         // compare head-to-head record
-        FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
-        int resultDuringHeadToHead = headToHeadGroup.compareTeamsBeforeHeadToHead(
-                headToHeadGroup.getTeamByName(team1.getName()), headToHeadGroup.getTeamByName(team2.getName()));
-        if (resultDuringHeadToHead != 0) {
-            return resultDuringHeadToHead;
+        if (havePlayedAgainst(team1, team2)) {
+            FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
+            int resultDuringHeadToHead = headToHeadGroup.compareTeamsBeforeHeadToHead(
+                    headToHeadGroup.getTeamByName(team1.getName()), headToHeadGroup.getTeamByName(team2.getName()));
+            if (resultDuringHeadToHead != 0) {
+                return resultDuringHeadToHead;
+            }
         }
         // compare disciplinary record
         if (team1.getFairPlayPoints() != team2.getFairPlayPoints()) {

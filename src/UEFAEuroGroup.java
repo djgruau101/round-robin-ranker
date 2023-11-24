@@ -18,21 +18,22 @@ public class UEFAEuroGroup extends Group {
         if (resultBeforeHeadToHead != 0) {
             return resultBeforeHeadToHead;
         }
-        // compare head-to-head record
-        UEFAEuroGroup headToHeadGroup = createSubGroup(team1);
-        Team team1HeadToHead = headToHeadGroup.getTeamByName(team1.getName());
-        Team team2HeadToHead = headToHeadGroup.getTeamByName(team2.getName());
-        int resultDuringHeadToHead = compareTeamsDuringHeadToHead(team1HeadToHead, team2HeadToHead);
-        if (resultDuringHeadToHead != 0) {
-            return resultDuringHeadToHead;
-        }
-        UEFAEuroGroup smallerHeadToHeadGroup = headToHeadGroup.createSubGroup(team1);
-        System.out.println("Smaller head-to-head group: " + smallerHeadToHeadGroup);
-        team1HeadToHead = smallerHeadToHeadGroup.getTeamByName(team1.getName());
-        team2HeadToHead = smallerHeadToHeadGroup.getTeamByName(team2.getName());
-        resultDuringHeadToHead = compareTeamsDuringHeadToHead(team1HeadToHead, team2HeadToHead);
-        if (resultDuringHeadToHead != 0) {
-            return resultDuringHeadToHead;
+        // comparing head-to-head record can only be done if both teams have faced each other
+        if (havePlayedAgainst(team1, team2)) {
+            UEFAEuroGroup headToHeadGroup = createSubGroup(team1);
+            Team team1HeadToHead = headToHeadGroup.getTeamByName(team1.getName());
+            Team team2HeadToHead = headToHeadGroup.getTeamByName(team2.getName());
+            int resultDuringHeadToHead = compareTeamsDuringHeadToHead(team1HeadToHead, team2HeadToHead);
+            if (resultDuringHeadToHead != 0) {
+                return resultDuringHeadToHead;
+            }
+            UEFAEuroGroup smallerHeadToHeadGroup = headToHeadGroup.createSubGroup(team1);
+            team1HeadToHead = smallerHeadToHeadGroup.getTeamByName(team1.getName());
+            team2HeadToHead = smallerHeadToHeadGroup.getTeamByName(team2.getName());
+            resultDuringHeadToHead = compareTeamsDuringHeadToHead(team1HeadToHead, team2HeadToHead);
+            if (resultDuringHeadToHead != 0) {
+                return resultDuringHeadToHead;
+            }
         }
         if (team1.getGoalDifference() != team2.getGoalDifference()) {
             return Integer.compare(team1.getGoalDifference(), team2.getGoalDifference());

@@ -44,18 +44,7 @@ public class UEFAEuroGroupRankingTest {
         // Euro 2020 Group F: Germany and Portugal had the same number of points but they did not draw in their game
         UEFAEuroGroup groupF2020 = createGroup("France", "Germany", "Portugal", "Hungary");
         groupF2020.addMatch("Hungary", "Portugal", "0-3");
-        UEFAEuroGroup subgroup = groupF2020.createSubGroup(groupF2020.getTeamByName("Hungary"));
-        System.out.println(subgroup);
-        System.out.println(groupF2020.getTableRowByTeamName("Portugal"));
-        System.out.println(groupF2020.getTableRowByTeamName("France"));
-        System.out.println(groupF2020.getTableRowByTeamName("Germany"));
-        System.out.println(groupF2020.getTableRowByTeamName("Hungary"));
         groupF2020.addMatch("France", "Germany", "1-0");
-        subgroup = groupF2020.createSubGroup(groupF2020.getTeamByName("Hungary"));
-        for (Team t: subgroup.sortedTeams()) {
-            System.out.println(t);
-        }
-        System.out.println(groupF2020.getTableRowByTeamName("France"));
         groupF2020.addMatch("Hungary", "France", "1-1");
         groupF2020.addMatch("Portugal", "Germany", "2-4");
         groupF2020.addMatch("Portugal", "France", "2-2");

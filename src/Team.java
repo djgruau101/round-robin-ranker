@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author Daniel Luo
  */
-public class Team {
+public class Team implements Cloneable {
 
     private final String name;
     private Set<Match> matches = new HashSet<>();
@@ -76,6 +76,13 @@ public class Team {
         } else {
             throw new IllegalArgumentException("Deducted points must be nonnegative.");
         }
+    }
+
+    private Team(Team other) {
+        this.name = other.name;
+        this.matches = new HashSet<>();
+        this.matches.addAll(other.matches);
+        this.deductedPoints = other.deductedPoints;
     }
 
     /**
@@ -358,6 +365,11 @@ public class Team {
         String result = matches.parallelStream().map(Team.Match::toString)
                 .collect(Collectors.joining(", ", initialString, "}}"));
         return String.format(result, name);
+    }
+
+    @Override
+    public Team clone() {
+        return new Team(this);
     }
 
     /**

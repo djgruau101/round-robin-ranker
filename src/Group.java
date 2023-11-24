@@ -248,6 +248,10 @@ public abstract class Group {
         return cloneTeams;
     }
 
+    public Team[] getTeams() {
+        return Arrays.stream(teams).map(Team::clone).toArray(Team[]::new);
+    }
+
     /**
      * Takes a string representing the name of a team and returns its position in the group.
      *
@@ -299,7 +303,7 @@ public abstract class Group {
 
     public String toString() {
         String initialString = this.getClass().getName() + "{teams={";
-        String result = Arrays.stream(sortedTeams()).map(Team::toString)
+        String result = Arrays.stream(getTeams()).map(Team::toString)
                 .collect(Collectors.joining(", ", initialString, "}, groupSize=%d, numberOfLegs=%d}"));
         return String.format(result, groupSize, numberOfLegs);
     }
