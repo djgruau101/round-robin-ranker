@@ -84,21 +84,21 @@ public class UEFAEuroGroupRankingTest {
     public void testDifferentGF() {
         // Euro 2020 Group A: Wales and Switzerland had the same number of points,
         // drew in their head-to-head match,but had a difference GD
-        UEFAEuroGroup groupF2020 = createGroup("Italy", "Wales", "Switzerland", "Turkey");
-        groupF2020.addMatch("Turkey", "Italy", "0-3");
-        groupF2020.addMatch("Wales", "Switzerland", "1-1");
-        groupF2020.addMatch("Turkey", "Wales", "0-2");
-        groupF2020.addMatch("Italy", "Switzerland", "3-0");
-        groupF2020.addMatch("Switzerland", "Turkey", "3-1");
-        groupF2020.addMatch("Italy", "Wales", "1-0");
+        UEFAEuroGroup groupA2020 = createGroup("Italy", "Wales", "Switzerland", "Turkey");
+        groupA2020.addMatch("Turkey", "Italy", "0-3");
+        groupA2020.addMatch("Wales", "Switzerland", "1-1");
+        groupA2020.addMatch("Turkey", "Wales", "0-2");
+        groupA2020.addMatch("Italy", "Switzerland", "3-0");
+        groupA2020.addMatch("Switzerland", "Turkey", "3-1");
+        groupA2020.addMatch("Italy", "Wales", "1-0");
         assertEquals("1: Italy, Pld: 3, W: 3, D: 0, L: 0, GF: 7, GA: 0, GD: +7, Pts: 9",
-                groupF2020.getTableRowByTeamName("Italy"));
+                groupA2020.getTableRowByTeamName("Italy"));
         assertEquals("2: Wales, Pld: 3, W: 1, D: 1, L: 1, GF: 3, GA: 2, GD: +1, Pts: 4",
-                groupF2020.getTableRowByTeamName("Wales"));
+                groupA2020.getTableRowByTeamName("Wales"));
         assertEquals("3: Switzerland, Pld: 3, W: 1, D: 1, L: 1, GF: 4, GA: 5, GD: -1, Pts: 4",
-                groupF2020.getTableRowByTeamName("Switzerland"));
+                groupA2020.getTableRowByTeamName("Switzerland"));
         assertEquals("4: Turkey, Pld: 3, W: 0, D: 0, L: 3, GF: 1, GA: 8, GD: -7, Pts: 0",
-                groupF2020.getTableRowByTeamName("Turkey"));
+                groupA2020.getTableRowByTeamName("Turkey"));
     }
 
     @Test
