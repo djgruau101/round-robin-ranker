@@ -83,7 +83,7 @@ public class UEFAEuroGroupRankingTest {
     @Test
     public void testDifferentGF() {
         // Euro 2020 Group A: Wales and Switzerland had the same number of points,
-        // drew in their head-to-head match,but had a difference GD
+        // drew in their head-to-head match,but had a different GD
         UEFAEuroGroup groupA2020 = createGroup("Italy", "Wales", "Switzerland", "Turkey");
         groupA2020.addMatch("Turkey", "Italy", "0-3");
         groupA2020.addMatch("Wales", "Switzerland", "1-1");
