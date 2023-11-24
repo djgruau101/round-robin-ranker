@@ -92,11 +92,6 @@ public class FIFAWorldCupGroup extends Group {
         return new FIFAWorldCupGroup(headToHeadTeams);
     }
 
-    @Override
-    protected FIFAWorldCupGroup createSubGroup(String teamName) {
-        return createSubGroup(getTeamByName(teamName));
-    }
-
     enum Card implements CardEnum {
 
         YELLOW(-1),

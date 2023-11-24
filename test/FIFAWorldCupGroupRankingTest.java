@@ -12,7 +12,7 @@ public class FIFAWorldCupGroupRankingTest {
      * Usage:
      * createGroup(teamName1, teamName2, ...);
      *
-     * @return Group C of the 2022 FIFA World Cup
+     * @return A group playing in the FIFA World Cup.
      */
     FIFAWorldCupGroup createGroup(String... teamNames) {
         Team[] teams = Arrays.stream(teamNames).map(Team::createInstance).toArray(Team[]::new);
@@ -102,17 +102,6 @@ public class FIFAWorldCupGroupRankingTest {
         // Pts: Japan 6, Senegal 3, Poland 3, Colombia 6
         // GD: Japan +3, Senegal -3, Poland -3, Colombia +3
         // GF: Japan 7, Senegal 4, Poland 4, Colombia 7
-
-        FIFAWorldCupGroup subGroup = groupH2018Adapted.createSubGroup("Japan");
-        assertEquals(Set.of("Japan", "Colombia"), subGroup.getTeamNames());
-        assertEquals(Set.of(new Team.Match("Japan", "1-2")),
-                subGroup.getTeamByName("Colombia").getMatches());
-        assertEquals(Set.of(new Team.Match("Colombia", "2-1")),
-                subGroup.getTeamByName("Japan").getMatches());
-        assertEquals(0, subGroup.getTeamByName("Colombia").getPoints());
-        assertEquals(3, subGroup.getTeamByName("Japan").getPoints());
-        assertTrue(subGroup.compareTeamsBeforeHeadToHead(
-                subGroup.getTeamByName("Japan"), subGroup.getTeamByName("Colombia")) > 0);
 
         assertTrue(groupH2018Adapted.compareTeams("Japan", "Colombia") > 0);
         assertTrue(groupH2018Adapted.compareTeams("Colombia", "Senegal") > 0);

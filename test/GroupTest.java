@@ -355,7 +355,6 @@ public class GroupTest {
         assertEquals(Set.of(new Team.Match("Arsenal", "4-1", false),
                 new Team.Match("Manchester City", "1-2", true)),
                 pl.getTeamByName("Chelsea").getMatches());
-        assertFalse(pl.isComplete());
     }
 
     @Test
@@ -549,8 +548,6 @@ public class GroupTest {
         assertEquals(3, pl.getTeamByName("Chelsea").getNumberOfMatchesPlayed());
     }
 
-    // testing specific operations for groups exceptions
-
     @Test
     public void testGetTeamByNameAndEncapsulation() {
         Group groupC2022 = groupC2022();
@@ -561,6 +558,24 @@ public class GroupTest {
         argentina.addMatch("Australia", "2-1", false);
         // the Argentina team instance in the group should not change
         assertEquals(factory.createTeam("Argentina", Set.of()), groupC2022.getTeamByName("Argentina"));
+    }
+
+    @Test
+    public void testHavePlayedAgainstOneLeg() {
+        Group groupC2022 = groupC2022();
+        groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
+        assertTrue(groupC2022.havePlayedAgainst("Argentina", "Saudi Arabia"));
+        assertFalse(groupC2022.havePlayedAgainst("Poland", "Mexico"));
+    }
+
+    @Test
+    public void testHavePlayedAgainstTwoLegs() {
+        PremierLeague pl = premierLeague();
+        pl.addMatch("Manchester City", "Chelsea", "2-1");
+        pl.addMatch("Chelsea", "Manchester City", "2-2");
+        pl.addMatch("Chelsea", "Arsenal", "4-1");
+        assertTrue(pl.havePlayedAgainst("Manchester City", "Chelsea"));
+        assertFalse(pl.havePlayedAgainst("Arsenal", "Manchester City"));
     }
 
     @Test

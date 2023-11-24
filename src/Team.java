@@ -356,8 +356,7 @@ public class Team {
     public String toString() {
         String initialString = "Team{name=%s, matches={";
         String result = matches.parallelStream().map(Team.Match::toString)
-                .collect(Collectors.joining(", ", initialString, "}"));
-        result += "}";
+                .collect(Collectors.joining(", ", initialString, "}}"));
         return String.format(result, name);
     }
 

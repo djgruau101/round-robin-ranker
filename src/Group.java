@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 public abstract class Group {
 
     private final Team[] teams;
+    private final int groupSize;
     private final int numberOfLegs;
     private final Map<Team,Integer> teamByPosition = new HashMap<>();
 
@@ -54,6 +55,7 @@ public abstract class Group {
         }
         this.teams = teamNameByMatches.entrySet().parallelStream().map(
                 entry -> Team.createInstance(entry.getKey(), entry.getValue())).toArray(Team[]::new);
+        this.groupSize = groupSize;
         this.numberOfLegs = numberOfLegs;
     }
 
@@ -216,18 +218,6 @@ public abstract class Group {
     protected abstract Group createSubGroup(Team team);
 
     /**
-     * Takes a team from the group and returns a group only consisting of itself and the
-     * teams that are tied with it on all criteria before applying the head-to-head record.
-     *
-     * @param teamName The name of a team in the group to be compared to other teams in the group.
-     * @return A group of tied teams.
-     */
-    protected Group createSubGroup(String teamName) {
-        Team team = getTeamByName(teamName);
-        return createSubGroup(team);
-    }
-
-    /**
      * Sorts the group's teams from highest ranked to lowest ranked
      * depending on the competition's ranking system.
      */
@@ -267,8 +257,18 @@ public abstract class Group {
      *         a negative integer if team2 is ranked above team1.
      */
     public int getTeamPositionByName(String teamName) throws IllegalArgumentException {
-        sortTeams();
         return teamByPosition.get(getTeamByName(teamName));
+    }
+
+    public boolean havePlayedAgainst(Team team1, Team team2) {
+        return team1.getMatches().parallelStream().map(Team.Match::getOpponentName)
+                .anyMatch(m -> m.equals(team2.getName())) &&
+                team2.getMatches().parallelStream().map(Team.Match::getOpponentName)
+                        .anyMatch(m -> m.equals(team1.getName()));
+    }
+
+    public boolean havePlayedAgainst(String team1Name, String team2Name) {
+        return havePlayedAgainst(getTeamByName(team1Name), getTeamByName(team2Name));
     }
 
     /**
@@ -295,6 +295,13 @@ public abstract class Group {
                 getTeamPositionByName(teamName), teamName, team.getNumberOfMatchesPlayed(),
                 team.getNumberWins(), team.getNumberDraws(), team.getNumberLosses(), team.getGoalsFor(),
                 team.getGoalsAgainst(), team.getGoalDifferenceToString(), team.getPoints());
+    }
+
+    public String toString() {
+        String initialString = this.getClass().getName() + "{teams={";
+        String result = Arrays.stream(sortedTeams()).map(Team::toString)
+                .collect(Collectors.joining(", ", initialString, "}, groupSize=%d, numberOfLegs=%d}"));
+        return String.format(result, groupSize, numberOfLegs);
     }
 
     interface CardEnum {
