@@ -42,7 +42,7 @@ public class FIFAWorldCupGroup extends Group {
         if (resultBeforeHeadToHead != 0) {
             return resultBeforeHeadToHead;
         }
-        // compare head-to-head record
+        // comparing head-to-head record can only be done if both teams have faced each other
         if (havePlayedAgainst(team1, team2)) {
             FIFAWorldCupGroup headToHeadGroup = createSubGroup(team1);
             int resultDuringHeadToHead = headToHeadGroup.compareTeamsBeforeHeadToHead(

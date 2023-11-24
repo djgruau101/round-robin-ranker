@@ -27,12 +27,15 @@ public class UEFAEuroGroup extends Group {
             if (resultDuringHeadToHead != 0) {
                 return resultDuringHeadToHead;
             }
+            // only applies if the original subgroup has more than two teams
             UEFAEuroGroup smallerHeadToHeadGroup = headToHeadGroup.createSubGroup(team1);
-            team1HeadToHead = smallerHeadToHeadGroup.getTeamByName(team1.getName());
-            team2HeadToHead = smallerHeadToHeadGroup.getTeamByName(team2.getName());
-            resultDuringHeadToHead = compareTeamsDuringHeadToHead(team1HeadToHead, team2HeadToHead);
-            if (resultDuringHeadToHead != 0) {
-                return resultDuringHeadToHead;
+            if (smallerHeadToHeadGroup.getTeams().length > 0) {
+                team1HeadToHead = smallerHeadToHeadGroup.getTeamByName(team1.getName());
+                team2HeadToHead = smallerHeadToHeadGroup.getTeamByName(team2.getName());
+                resultDuringHeadToHead = compareTeamsDuringHeadToHead(team1HeadToHead, team2HeadToHead);
+                if (resultDuringHeadToHead != 0) {
+                    return resultDuringHeadToHead;
+                }
             }
         }
         if (team1.getGoalDifference() != team2.getGoalDifference()) {
@@ -41,10 +44,17 @@ public class UEFAEuroGroup extends Group {
         if (team1.getGoalsFor() != team2.getGoalsFor()) {
             return Integer.compare(team1.getGoalsFor(), team2.getGoalsFor());
         }
-        if (team1.getFairPlayPoints() != team2.getFairPlayPoints()) {
-            return Integer.compare(team1.getFairPlayPoints(), team2.getFairPlayPoints());
+        if (team1.getNumberWins() != team2.getNumberWins()) {
+            return Integer.compare(team1.getNumberWins(), team2.getNumberWins());
+        }
+        if (tiedTeamsBeforeFairPlay(team1).length > 2) {
+            // if there were exactly two teams equal at the very end, a penalty shoot-out will decide
+            if (team1.getFairPlayPoints() != team2.getFairPlayPoints()) {
+                return Integer.compare(team1.getFairPlayPoints(), team2.getFairPlayPoints());
+            }
         }
         // technically, the last criterion is the position in the overall Euro Qualifiers rankings
+        // penalty shoot-out criterion not implemented here
         Random random = new Random();
         int randomValue = random.nextInt(2); // will be either 0 or 1
         return (randomValue == 0) ? -1 : 1;
@@ -76,16 +86,21 @@ public class UEFAEuroGroup extends Group {
     }
 
     /**
-     * In the Euros, if two teams are still equal after their number of points, head-to-head record,
-     * goal difference, goals scored and there are more than two teams
+     * In the Euros, if more than two teams are still equal after their number of points, head-to-head record,
+     * goal difference, goals scored and number of wins, compare the disciplinary record of the teams.
+     *
+     * If on the last round of group stage, there are only two tied teams that are still equal and they
+     * draw their match, a penalty shoot-out will decide their ranking.
+     *
+     * This method takes a team and return the list of teams that are equal after their
+     * number of points, head-to-head record, goal difference, goals scored and number of wins.
      *
      * @param team A football team competing in a Euro competition.
-     * @return A group containing exclusively the tied teams
+     * @return A group containing exclusively the tied teams.
      */
-    private UEFAEuroGroup createSubGroup2(Team team) {
-        Team[] headToHeadTeams = this.getTeamNames().parallelStream()
+    private Team[] tiedTeamsBeforeFairPlay(Team team) {
+        return this.getTeamNames().parallelStream()
                 .map(this::getTeamByName).filter(t -> compareTeamsDuringHeadToHead(team, t) == 0).toArray(Team[]::new);
-        return new UEFAEuroGroup(headToHeadTeams);
     }
 
     enum Card implements CardEnum {

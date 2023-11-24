@@ -264,6 +264,14 @@ public abstract class Group {
         return teamByPosition.get(getTeamByName(teamName));
     }
 
+    /**
+     * Takes two Team objects and returns true if the teams have played at least one match against each other.
+     *
+     * @param team1 A football team.
+     * @param team2 Another football team.
+     *
+     * @return true if team1 and team2 have played at least one match against each other, false otherwise.
+     */
     public boolean havePlayedAgainst(Team team1, Team team2) {
         return team1.getMatches().parallelStream().map(Team.Match::getOpponentName)
                 .anyMatch(m -> m.equals(team2.getName())) &&
