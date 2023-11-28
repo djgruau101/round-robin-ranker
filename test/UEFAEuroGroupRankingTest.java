@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UEFAEuroGroupRankingTest {
 
     /**
-     * Constructs a new UEFAEuroCupGroup with the given team names.
+     * Constructs a new UEFAEuroGroup with the given team names.
      *
      * Usage:
      * createGroup(teamName1, teamName2, ...);
@@ -126,21 +126,21 @@ public class UEFAEuroGroupRankingTest {
     public void testThreeWayTieHeadToHeadGF() {
         // Euro 2004 Group C: three-way tie between Sweden, Denmark and Italy
         // on points, head-to-head points, GD but not GF.
-        // Early tie-breaking criteria back then are still the same today.
-        UEFAEuroGroup groupB2020 = createGroup("Sweden", "Denmark", "Italy", "Bulgaria");
-        groupB2020.addMatch("Denmark", "Italy", "0-0");
-        groupB2020.addMatch("Sweden", "Bulgaria", "5-0");
-        groupB2020.addMatch("Bulgaria", "Denmark", "0-2");
-        groupB2020.addMatch("Italy", "Sweden", "1-1");
-        groupB2020.addMatch("Italy", "Bulgaria", "2-1");
-        groupB2020.addMatch("Denmark", "Sweden", "2-2");
+        // The tie-breaking criteria back then were fairly similar to today's, until disciplinary points.
+        UEFAEuroGroup groupC2004 = createGroup("Sweden", "Denmark", "Italy", "Bulgaria");
+        groupC2004.addMatch("Denmark", "Italy", "0-0");
+        groupC2004.addMatch("Sweden", "Bulgaria", "5-0");
+        groupC2004.addMatch("Bulgaria", "Denmark", "0-2");
+        groupC2004.addMatch("Italy", "Sweden", "1-1");
+        groupC2004.addMatch("Italy", "Bulgaria", "2-1");
+        groupC2004.addMatch("Denmark", "Sweden", "2-2");
         assertEquals("1: Sweden, Pld: 3, W: 1, D: 2, L: 0, GF: 8, GA: 3, GD: +5, Pts: 5",
-                groupB2020.getTableRowByTeamName("Sweden"));
+                groupC2004.getTableRowByTeamName("Sweden"));
         assertEquals("2: Denmark, Pld: 3, W: 1, D: 2, L: 0, GF: 4, GA: 2, GD: +2, Pts: 5",
-                groupB2020.getTableRowByTeamName("Denmark"));
+                groupC2004.getTableRowByTeamName("Denmark"));
         assertEquals("3: Italy, Pld: 3, W: 1, D: 2, L: 0, GF: 3, GA: 2, GD: +1, Pts: 5",
-                groupB2020.getTableRowByTeamName("Italy"));
+                groupC2004.getTableRowByTeamName("Italy"));
         assertEquals("4: Bulgaria, Pld: 3, W: 0, D: 0, L: 3, GF: 1, GA: 9, GD: -8, Pts: 0",
-                groupB2020.getTableRowByTeamName("Bulgaria"));
+                groupC2004.getTableRowByTeamName("Bulgaria"));
     }
 }
