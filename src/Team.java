@@ -167,7 +167,7 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Sets the number of points to deduct from a team due to policy violations.
+     * Sets the number of points to deduct from the team due to policy violations.
      *
      * @param points The number of points to deduct from a team.
      * @throws IllegalArgumentException If the number of points is negative.
@@ -181,7 +181,7 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Adjusts the number of deducted points for a team.
+     * Adjusts the number of deducted points for the team.
      *
      * @param points The number of points to adjust the total number of deducted points.
      *               Adds to the total if non-negative, subtracts if negative
@@ -199,7 +199,7 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Returns the number of matches the team has won.
+     * Returns the number of matches that the team has won.
      * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of won matches.
@@ -210,7 +210,7 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Returns the number of matches the team has drawn.
+     * Returns the number of matches that the team has drawn.
      * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of drawn matches.
@@ -221,7 +221,7 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Returns the number of matches the team has lost.
+     * Returns the number of matches that the team has lost.
      * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of lost matches.
@@ -232,7 +232,8 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Returns the team's number of points in a round-robin tournament based on its matches' outcome.
+     * Returns the team's number of points in a round-robin tournament based on its matches' outcome,
+     * subtracted by the number of points to deduct from the team for policy violations.
      * A loss is 0 point, a draw is 1 point and a win is 3 points.
      * For double-legged tournaments, this only applies to matches played at home.
      *
@@ -253,7 +254,8 @@ public class Team implements Cloneable {
     }
 
     /**
-     * Calculates the total number of goals conceded by the team during the tournament, also known as 'goals against' (GA).
+     * Calculates the total number of goals conceded by the team during the tournament,
+     * also known as 'goals against' (GA).
      *
      * @return The number of goals conceded.
      */
@@ -497,7 +499,7 @@ public class Team implements Cloneable {
         }
 
         /**
-         * Returns whether the match is played away from home during a double-legged tournament.
+         * Returns whether the team plays the match away from home during a double-legged tournament.
          *
          * @return true if the match is played away from home during a double-legged tournament,
          *         false if the match is played at home or if the tournament is single-legged.
