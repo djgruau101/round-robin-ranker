@@ -21,7 +21,7 @@ public class FIFAWorldCupGroupRankingTest {
 
     @Test
     public void testDifferentPoints() {
-        // Qatar 2022 Group A: all teams had different number of points
+        // 2022 World Cup Group A: all teams had a different number of points
         FIFAWorldCupGroup groupA2022 = createGroup("Qatar", "Netherlands", "Senegal", "Ecuador");
         groupA2022.addMatch("Qatar", "Ecuador", "0-2");
         groupA2022.addMatch("Senegal", "Netherlands", "0-2");
@@ -50,7 +50,7 @@ public class FIFAWorldCupGroupRankingTest {
 
     @Test
     public void testDifferentGD() {
-        // Qatar 2022 Group C: Poland and Mexico were tied on points but not on GD
+        // 2022 World Cup Group C: Poland and Mexico were tied on points but not on GD
         FIFAWorldCupGroup groupC2022 = createGroup("Argentina", "Saudi Arabia", "Poland", "Mexico");
         groupC2022.addMatch("Argentina", "Saudi Arabia", "1-2");
         groupC2022.addMatch("Poland", "Mexico", "0-0");
@@ -70,7 +70,7 @@ public class FIFAWorldCupGroupRankingTest {
 
     @Test
     public void testDifferentGF() {
-        // Qatar 2022 Group H: South Korea and Uruguay tied on points and GD, but not on GF
+        // World Cup 2022 Group H: South Korea and Uruguay were tied on points and GD, but not on GF
         FIFAWorldCupGroup groupH2022 = createGroup("Portugal", "Ghana", "South Korea", "Uruguay");
         groupH2022.addMatch("Uruguay", "South Korea", "0-0");
         groupH2022.addMatch("Portugal", "Ghana", "3-2");
@@ -90,7 +90,8 @@ public class FIFAWorldCupGroupRankingTest {
 
     @Test
     public void testHeadToHeadTwoTeams() {
-        // Japan x Colombia and Senegal x Poland are tied on points and GD, and GF, but head-to-head result is not a draw
+        // Japan x Colombia and Senegal x Poland are tied on points and GD, and GF
+        // but head-to-head result is not a draw
         FIFAWorldCupGroup groupH2018Adapted = createGroup("Senegal", "Japan", "Poland", "Colombia");
         groupH2018Adapted.addMatch("Colombia", "Japan", "1-2");
         groupH2018Adapted.addMatch("Poland", "Senegal", "1-2");
@@ -119,7 +120,7 @@ public class FIFAWorldCupGroupRankingTest {
 
     @Test
     public void testDifferentFairPlayPoints() {
-        // Russia 2018 Group H: Japan and Senegal tied on points,
+        // 2018 World Cup Group H: Japan and Senegal were tied on points,
         // GD, GF, head-to-head record, but not on fair play points
         FIFAWorldCupGroup groupH2018 = createGroup("Senegal", "Japan", "Poland", "Colombia");
         groupH2018.addMatch("Colombia", "Japan", "1-2",

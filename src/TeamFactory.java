@@ -43,6 +43,36 @@ public class TeamFactory {
     }
 
     /**
+     * A private helper method to handle team creation and registration in teamRegistry.
+     *
+     * @param name A team name.
+     * @param matches A set containing the matches the team has played. Can be null if not applicable.
+     * @param deductedPoints The number of points to deduct from the team's total due to policy violations.
+     * This value reflects the penalty imposed for breaching tournament rules or regulations.
+     * Defaults to 0 if not applicable.
+     * @return A Team instance.
+     */
+    private Team createTeamInternal(String name, Set<Team.Match> matches, Integer deductedPoints) {
+        if (teamRegistry.containsKey(name)) {
+            // If a team with the same name already exists, return it
+            return teamRegistry.get(name);
+        } else {
+            Team newTeam;
+            if (matches != null && deductedPoints != null) {
+                newTeam = Team.createInstance(name, matches, deductedPoints);
+            } else if (matches != null) {
+                newTeam = Team.createInstance(name, matches);
+            } else if (deductedPoints != null) {
+                newTeam = Team.createInstance(name, deductedPoints);
+            } else {
+                newTeam = Team.createInstance(name);
+            }
+            teamRegistry.put(name, newTeam);
+            return newTeam;
+        }
+    }
+
+    /**
      * Creates an instance of the Team class if teamRegistry does not contain the given team name,
      * and sets its matches to the given 'matches' set.
      * Otherwise, return the Team instance from teamRegistry that has the given team name.
@@ -54,15 +84,7 @@ public class TeamFactory {
      * @return A Team instance.
      */
     public Team createTeam(String name, Set<Team.Match> matches) {
-        if (teamRegistry.containsKey(name)) {
-            // If a team with the same name already exists, return it
-            return teamRegistry.get(name);
-        } else {
-            // Otherwise, create a new team, register it, and return
-            Team newTeam = Team.createInstance(name, matches);
-            teamRegistry.put(name, newTeam);
-            return newTeam;
-        }
+        return createTeamInternal(name, matches, null);
     }
 
     /**
@@ -76,59 +98,39 @@ public class TeamFactory {
      * @return A Team instance.
      */
     public Team createTeam(String name) {
-        if (teamRegistry.containsKey(name)) {
-            // If a team with the same name already exists, return it
-            return teamRegistry.get(name);
-        } else {
-            // Otherwise, create a new team, register it, and return
-            Team newTeam = Team.createInstance(name); // We don't need to care about matches
-            teamRegistry.put(name, newTeam);
-            return newTeam;
-        }
+        return createTeamInternal(name, null, null);
     }
 
     /**
      * Creates an instance of the Team class if teamRegistry does not contain the given team name,
-     * and sets its matches to the given 'matches' set.
+     * sets its matches to the given 'matches' set and sets its number of deducted points.
      * Otherwise, return the Team instance from teamRegistry that has the given team name.
      *
      * This method ensures uniqueness of all Team instances, that is, all instances have different names.
      *
      * @param name A team name.
      * @param matches A set containing the matches the team has played.
+     * @param deductedPoints The number of points to deduct from the team's total due to policy violations.
+     * This value reflects the penalty imposed for breaching tournament rules or regulations.
      * @return A Team instance.
      */
     public Team createTeam(String name, Set<Team.Match> matches, int deductedPoints) {
-        if (teamRegistry.containsKey(name)) {
-            // If a team with the same name already exists, return it
-            return teamRegistry.get(name);
-        } else {
-            // Otherwise, create a new team, register it, and return
-            Team newTeam = Team.createInstance(name, matches, deductedPoints);
-            teamRegistry.put(name, newTeam);
-            return newTeam;
-        }
+        return createTeamInternal(name, matches, deductedPoints);
     }
 
     /**
      * Creates an instance of the Team class if teamRegistry does not contain the given team name,
-     * and sets its matches to an empty set.
+     * sets its matches to an empty set and sets its number of deducted points.
      * Otherwise, return the Team instance from teamRegistry that has the given team name.
      *
      * This method ensures uniqueness of all Team instances, that is, all instances have different names.
      *
      * @param name A team name.
+     * @param deductedPoints The number of points to deduct from the team's total due to policy violations.
+     * This value reflects the penalty imposed for breaching tournament rules or regulations.
      * @return A Team instance.
      */
-    public Team createTeam(String name, int pointsDeducted) {
-        if (teamRegistry.containsKey(name)) {
-            // If a team with the same name already exists, return it
-            return teamRegistry.get(name);
-        } else {
-            // Otherwise, create a new team, register it, and return
-            Team newTeam = Team.createInstance(name, pointsDeducted); // We don't need to care about matches
-            teamRegistry.put(name, newTeam);
-            return newTeam;
-        }
+    public Team createTeam(String name, int deductedPoints) {
+        return createTeamInternal(name, null, deductedPoints);
     }
 }

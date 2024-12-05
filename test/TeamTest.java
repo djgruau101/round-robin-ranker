@@ -72,7 +72,7 @@ public class TeamTest {
         TeamFactory factory = new TeamFactory();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "01-2"))));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class TeamTest {
         TeamFactory factory = new TeamFactory();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-02"))));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class TeamTest {
         TeamFactory factory = new TeamFactory();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1-2g"))));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class TeamTest {
         TeamFactory factory = new TeamFactory();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "0"))));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class TeamTest {
         TeamFactory factory = new TeamFactory();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "021"))));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class TeamTest {
         TeamFactory factory = new TeamFactory();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.createTeam("Germany", Set.of(new Team.Match("Japan", "1- 2"))));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     // testing adding and removing matches for single-legged tournaments
@@ -203,7 +203,7 @@ public class TeamTest {
         Team germany = factory.createTeam("Germany");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> germany.addMatch("Germany", "2- 3", false));
-        assertEquals("The score must be two nonnegative integers separated by '-', " +
+        assertEquals("The score must be two non-negative integers separated by '-', " +
                 "and all opponents' names should be different from the team's name.", exception.getMessage());
     }
 
@@ -228,6 +228,7 @@ public class TeamTest {
     }
 
     // testing calculations of number of wins, losses, draws
+    // the following tests are based on the results from the 2022 FIFA World Cup
 
     @Test
     public void testNumberMatchesWon() {
@@ -317,8 +318,8 @@ public class TeamTest {
                 Set.of(new Team.Match("Saudi Arabia", "1-2")));
         argentina.addMatch("Mexico", "2-0", false);
         argentina.addMatch("Poland", "2-0", false);
-        argentina.deductPoints(3);
-        argentina.deductPoints(1);
+        argentina.adjustPenaltyPoints(3);
+        argentina.adjustPenaltyPoints(1);
         assertEquals(2, argentina.getPoints());
     }
 

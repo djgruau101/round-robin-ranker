@@ -38,45 +38,27 @@ public class Team implements Cloneable {
     private Set<Match> matches = new HashSet<>();
     private int deductedPoints;
 
+    // The following variables are used for displaying error messages
     private static boolean scoreInvalid = false;
     private static boolean isPlayingAgainstItself = false;
-    private static final String scoreInvalidMessage = "The score must be two nonnegative integers separated by '-'.";
+    private static final String scoreInvalidMessage = "The score must be two non-negative integers separated by '-'.";
     private static final String isPlayingAgainstItselfMessage =
             "All opponents' names should be different from the team's name.";
-    private static final String compoundErrorMessage = "The score must be two nonnegative integers separated by '-', " +
-            "and all opponents' names should be different from the team's name.";
-
-    private Team(String name, Set<Match> matches) {
-        this.name = name;
-        this.matches.addAll(matches);
-        this.deductedPoints = 0;
-    }
-
-    private Team(String name) {
-        this.name = name;
-        this.matches = new HashSet<>();
-        this.deductedPoints = 0;
-    }
+    private static final String compoundErrorMessage =
+            scoreInvalidMessage.substring(0, scoreInvalidMessage.length() - 1) +
+                    ", and " + isPlayingAgainstItselfMessage.toLowerCase();
 
     private Team(String name, Set<Match> matches, int deductedPoints) {
         this.name = name;
         this.matches.addAll(matches);
-        if (deductedPoints >= 0) {
-            this.deductedPoints = deductedPoints;
-        } else {
-            throw new IllegalArgumentException("Deducted points must be nonnegative.");
-        }
+        setDeductedPoints(deductedPoints);
     }
 
-    private Team(String name, int deductedPoints){
-        this.name = name;
-        this.matches = new HashSet<>();
-        if (deductedPoints >= 0) {
-            this.deductedPoints = deductedPoints;
-        } else {
-            throw new IllegalArgumentException("Deducted points must be nonnegative.");
-        }
-    }
+    private Team(String name, Set<Match> matches) { this(name, matches, 0); }
+
+    private Team(String name) { this(name, new HashSet<>(), 0); }
+
+    private Team(String name, int deductedPoints) { this(name, new HashSet<>(), deductedPoints); }
 
     private Team(Team other) {
         this.name = other.name;
@@ -90,7 +72,7 @@ public class Team implements Cloneable {
      *
      * @param match A football match.
      * @throws IllegalArgumentException If the match's score is not expressed in the following format:
-     *                                  two nonnegative integers separated by a '-',
+     *                                  two non-negative integers separated by a '-',
      *                                  or 'opponentName' is equal to the team's name.
      */
     public void addMatch(Match match) throws IllegalArgumentException {
@@ -118,7 +100,7 @@ public class Team implements Cloneable {
      *
      * @param opponentName The name of a team that the team has played against.
      * @param score The score of the match against said team.
-     *              It consists of two nonnegative integers separated by a '-'.
+     *              It consists of two non-negative integers separated by a '-'.
      *              Its format is "goalsByThisTeam-goalsByRivalTeam".
      * @param isAway Whether the match is an away match.
      *               It will always be false if the tournament the competes in is single-legged.
@@ -138,7 +120,7 @@ public class Team implements Cloneable {
      *
      * @param opponentName The name of a team that the team has played against.
      * @param score The score of the match against said team.
-     *              It consists of two nonnegative integers separated by a '-'.
+     *              It consists of two non-negative integers separated by a '-'.
      *              Its format is "goalsByThisTeam-goalsByRivalTeam".
      * @param isAway Whether the match is an away match.
      *               It will always be false if the tournament the competes in is single-legged.
@@ -161,7 +143,7 @@ public class Team implements Cloneable {
      *
      * @param matches The matches that the team has played.
      * @throws IllegalArgumentException If at least one score is not in the correct format:
-     *                                  two nonnegative integers separated by a '-',
+     *                                  two non-negative integers separated by a '-',
      *                                  or at least one match's opponent's name is equal to the team's name.
      */
     public void addMatches(Match... matches) throws IllegalArgumentException {
@@ -178,19 +160,34 @@ public class Team implements Cloneable {
      *
      * @param opponentName The name of a team that the team played against.
      * @param isAway Whether the match is an away match.
-     *               It will always be false if the tournament the competes in is single-legged.
+     *               It will always be false if the tournament the team competes in is single-legged.
      */
     public void removeMatchByOpponentName(String opponentName, boolean isAway) {
         matches.removeIf(match -> match.getOpponentName().equals(opponentName) && match.isAway == isAway);
     }
 
-    public void deductPoints(int points) {
-        this.deductedPoints += points;
+    /**
+     * Sets the number of points to deduct from a team due to policy violations.
+     *
+     * @param points The number of points to deduct from a team.
+     * @throws IllegalArgumentException If the number of points is negative.
+     */
+    public void setDeductedPoints(int points) {
+        if (points >= 0) {
+            this.deductedPoints = points;
+        } else {
+            throw new IllegalArgumentException("Deducted points must be non-negative.");
+        }
     }
 
-    public void setDeductedPoints(int points) {
-        this.deductedPoints = points;
-    }
+    /**
+     * Adjusts the number of deducted points for a team.
+     *
+     * @param points The number of points to adjust the total number of deducted points.
+     *               Adds to the total if non-negative, subtracts if negative
+     * @throws IllegalArgumentException If the new total number of deducted points becomes negative.
+     */
+    public void adjustPenaltyPoints(int points) { setDeductedPoints(this.deductedPoints + points); }
 
     /**
      * Returns the set of matches that the team has played.
@@ -295,8 +292,6 @@ public class Team implements Cloneable {
         return this.getMatches().size();
     }
 
-
-
     /**
      * Returns whether some other object is "equal to" this team object.
      *
@@ -306,7 +301,8 @@ public class Team implements Cloneable {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Team otherTeam = (Team) obj;
-        return name.equals(otherTeam.name) && this.getMatches().equals(otherTeam.getMatches());
+        return name.equals(otherTeam.name) && this.getMatches().equals(otherTeam.getMatches())
+                && this.deductedPoints == otherTeam.deductedPoints;
     }
 
     @Override
@@ -559,7 +555,7 @@ public class Team implements Cloneable {
 
         /**
          * Takes a string representing the score of a match and returns whether its format is incorrect.
-         * A correctly formatted score consists of two nonnegative integers separated by a '-'.
+         * A correctly formatted score consists of two non-negative integers separated by a '-'.
          * Examples of correctly formatted scores: "0-0", "0-2", "1-0", "2-3", "10-20"
          * Examples of incorrectly formatted scores: "02-1", "3-00", "2- 1", "5s-3"
          *
@@ -567,7 +563,7 @@ public class Team implements Cloneable {
          * @return true if the score is incorrectly formatted, false otherwise.
          */
         static boolean isScoreInvalid(String score) {
-            String pattern = "^(0|[1-9]\\d*)-(0|[1-9]\\d*)$"; // nonnegative integer, hyphen, nonnegative integer
+            String pattern = "^(0|[1-9]\\d*)-(0|[1-9]\\d*)$"; // non-negative integer, hyphen, non-negative integer
             Pattern regex = Pattern.compile(pattern);
             Matcher matcher = regex.matcher(score);
             return !matcher.matches();
@@ -652,7 +648,7 @@ public class Team implements Cloneable {
 
     /**
      * Throws an exception if either the user passed in an incorrectly formatted score
-     * (the correct format is two nonnegative integers separated by a '-'),
+     * (the correct format is two non-negative integers separated by a '-'),
      * or the opponentName of one Match instance equals the name of the Team instance that contains the Match instance.
      */
     static void throwExceptionMessage() {

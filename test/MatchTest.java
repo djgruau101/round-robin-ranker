@@ -26,21 +26,21 @@ public class MatchTest {
     public void testConstructorInvalidScoreExtraChars() throws IllegalArgumentException {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new Team.Match("Japan", "1 -2"));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testConstructorInvalidScoreNoHyphen() throws IllegalArgumentException {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new Team.Match("Japan", "12"));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
     public void testConstructorInvalidScoreOneInteger() throws IllegalArgumentException {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new Team.Match("Japan", "1-"));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class MatchTest {
         Team.Match match = new Team.Match("Japan", "3-2");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> match.setScore("-"));
-        assertEquals("The score must be two nonnegative integers separated by '-'.", exception.getMessage());
+        assertEquals("The score must be two non-negative integers separated by '-'.", exception.getMessage());
     }
 
     @Test
