@@ -184,7 +184,7 @@ public class Team implements Cloneable {
      * Adjusts the number of deducted points for the team.
      *
      * @param points The number of points to adjust the total number of deducted points.
-     *               Adds to the total if non-negative, subtracts if negative
+     *               Adds to the total if non-negative, subtracts if negative.
      * @throws IllegalArgumentException If the new total number of deducted points becomes negative.
      */
     public void adjustPenaltyPoints(int points) { setDeductedPoints(this.deductedPoints + points); }
@@ -200,7 +200,6 @@ public class Team implements Cloneable {
 
     /**
      * Returns the number of matches that the team has won.
-     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of won matches.
      */
@@ -211,7 +210,6 @@ public class Team implements Cloneable {
 
     /**
      * Returns the number of matches that the team has drawn.
-     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of drawn matches.
      */
@@ -222,7 +220,6 @@ public class Team implements Cloneable {
 
     /**
      * Returns the number of matches that the team has lost.
-     * For double-legged tournaments, this only applies to matches played at home.
      *
      * @return Number of lost matches.
      */

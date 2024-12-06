@@ -495,6 +495,8 @@ public class TeamTest {
         assertNotEquals(manCity2, manCity1);
     }
 
+    // testing home and away matches
+
     @Test
     public void testGetHomeMatches() {
         TeamFactory factory = new TeamFactory();
@@ -532,6 +534,51 @@ public class TeamTest {
                 new Team.Match("Arsenal", "0-1", false));
         assertEquals(4, team.getAwayGoals());
     }
+
+    @Test
+    public void testGetNumberWinsHomeAway() {
+        // Manchester City's 10th to 14th matches of the 2024-25 Premier League
+        TeamFactory factory = new TeamFactory();
+        Team team = factory.createTeam("Manchester City");
+        team.addMatches(
+                new Team.Match("Bournemouth", "1-2", true),
+                new Team.Match("Brighton & Hove Albion", "1-2", true),
+                new Team.Match("Tottenham Hotspur", "0-4", false),
+                new Team.Match("Liverpool", "0-2", true),
+                new Team.Match("Nottingham Forest", "3-0", false));
+        assertEquals(1, team.getNumberWins());
+    }
+
+    @Test
+    public void testGetNumberLossesHomeAway() {
+        // Manchester City's 10th to 14th matches of the 2024-25 Premier League
+        TeamFactory factory = new TeamFactory();
+        Team team = factory.createTeam("Manchester City");
+        team.addMatches(
+                new Team.Match("Bournemouth", "1-2", true),
+                new Team.Match("Brighton & Hove Albion", "1-2", true),
+                new Team.Match("Tottenham Hotspur", "0-4", false),
+                new Team.Match("Liverpool", "0-2", true),
+                new Team.Match("Nottingham Forest", "3-0", false));
+        assertEquals(4, team.getNumberLosses());
+    }
+
+    @Test
+    public void testGetNumberDrawsHomeAway() {
+        // Liverpool's 9th to 14th matches of the 2024-25 Premier League
+        TeamFactory factory = new TeamFactory();
+        Team team = factory.createTeam("Liverpool");
+        team.addMatches(
+                new Team.Match("Arsenal", "2-2", true),
+                new Team.Match("Brighton & Hove Albion", "2-1", false),
+                new Team.Match("Aston Villa", "2-0", false),
+                new Team.Match("Southampton", "3-2", true),
+                new Team.Match("Manchester City", "2-0", false),
+                new Team.Match("Newcastle United", "3-3", true));
+        assertEquals(2, team.getNumberDraws());
+    }
+
+    // testing getName and toString
 
     @Test
     public void testGetName() {
