@@ -80,9 +80,9 @@ public class Team implements Cloneable {
         isPlayingAgainstItself = match.getOpponentName().equals(this.getName());
         throwExceptionMessage();
         if (matches.parallelStream().anyMatch(
-                m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway == match.isAway)) {
+                m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway() == match.isAway())) {
             matches.stream()
-                    .filter(m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway == match.isAway)
+                    .filter(m -> m.getOpponentName().equals(match.getOpponentName()) && m.isAway() == match.isAway())
                     .forEach(m -> {
                         m.setScore(match.getScore());
                         m.setSelfCards(match.getSelfCards());
@@ -163,7 +163,7 @@ public class Team implements Cloneable {
      *               It will always be false if the tournament the team competes in is single-legged.
      */
     public void removeMatchByOpponentName(String opponentName, boolean isAway) {
-        matches.removeIf(match -> match.getOpponentName().equals(opponentName) && match.isAway == isAway);
+        matches.removeIf(match -> match.getOpponentName().equals(opponentName) && match.isAway() == isAway);
     }
 
     /**
@@ -315,7 +315,7 @@ public class Team implements Cloneable {
      * @return The set of home matches that the team has played.
      */
     public Set<Match> getHomeMatches() {
-        return matches.parallelStream().filter(m -> !m.isAway).collect(Collectors.toSet());
+        return matches.parallelStream().filter(m -> !m.isAway()).collect(Collectors.toSet());
     }
 
     /**
@@ -324,7 +324,7 @@ public class Team implements Cloneable {
      * @return The set of away matches that the team has played.
      */
     public Set<Match> getAwayMatches() {
-        return matches.parallelStream().filter(m -> m.isAway).collect(Collectors.toSet());
+        return matches.parallelStream().filter(m -> m.isAway()).collect(Collectors.toSet());
     }
 
     /**
@@ -334,15 +334,18 @@ public class Team implements Cloneable {
      * @return The number of away matches that the team has scored.
      */
     public int getAwayGoals() {
-        return matches.parallelStream().filter(m -> m.isAway).mapToInt(Match::getGoalsScored).sum();
+        return matches.parallelStream().filter(m -> m.isAway()).mapToInt(Match::getGoalsScored).sum();
     }
 
     public List<Group.CardEnum> getCards() {
-        return matches.parallelStream().map(Match::getSelfCards).flatMap(List::stream).collect(Collectors.toList());
+        return matches.parallelStream()
+                .map(match -> (List<Group.CardEnum>) match.getSelfCards())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     public int getFairPlayPoints() {
-        return matches.parallelStream().map(Match::getSelfCards)
+        return matches.parallelStream().map(match -> (List<Group.CardEnum>) match.getSelfCards())
                 .flatMap(List::stream).mapToInt(Group.CardEnum::getPenalty).sum();
     }
 
@@ -382,210 +385,24 @@ public class Team implements Cloneable {
      * played against Real Madrid, where the team scored 3 goals and Real Madrid scored 1 goal.
      * Penalty cards will only be considered for tie-breaking purposes.
      */
-    static class Match {
-
-        private final String opponentName;
-        private String score;
-        private final boolean isAway;
-        private List<Group.CardEnum> selfCards;
-        private List<Group.CardEnum> opponentCards;
+    static class Match extends org.example.Match {
 
         public Match(String opponentName, String score, boolean isAway) throws IllegalArgumentException {
-            scoreInvalid = isScoreInvalid(score);
-            throwExceptionMessage();
-            this.opponentName = opponentName;
-            this.score = score;
-            this.isAway = isAway;
-            this.selfCards = List.of();
-            this.opponentCards = List.of();
+            super(opponentName, score, isAway);
         }
 
         public Match(String opponentName, String score) throws IllegalArgumentException {
-            scoreInvalid = isScoreInvalid(score);
-            throwExceptionMessage();
-            this.opponentName = opponentName;
-            this.score = score;
-            this.isAway = false;
-            this.selfCards = List.of();
-            this.opponentCards = List.of();
+            super(opponentName, score);
         }
 
         public Match(String opponentName, String score, boolean isAway, List<Group.CardEnum> selfCards,
                      List<Group.CardEnum> opponentCards) throws IllegalArgumentException {
-            scoreInvalid = isScoreInvalid(score);
-            throwExceptionMessage();
-            this.opponentName = opponentName;
-            this.score = score;
-            this.isAway = isAway;
-            this.selfCards = selfCards;
-            this.opponentCards = opponentCards;
+            super(opponentName, score, isAway, selfCards, opponentCards);
         }
 
         public Match(String opponentName, String score, List<Group.CardEnum> selfCards,
                      List<Group.CardEnum> opponentCards) throws IllegalArgumentException {
-            scoreInvalid = isScoreInvalid(score);
-            throwExceptionMessage();
-            this.opponentName = opponentName;
-            this.score = score;
-            this.isAway = false;
-            this.selfCards = selfCards;
-            this.opponentCards = opponentCards;
-        }
-
-        public List<Group.CardEnum> getSelfCards() {
-            return new ArrayList<>(selfCards);
-        }
-
-        public void setSelfCards(List<Group.CardEnum> cards) {
-            if (cards == null) {
-                throw new IllegalArgumentException("cards cannot be null");
-            }
-            this.selfCards = List.copyOf(cards);
-        }
-
-        public List<Group.CardEnum> getOpponentCards() {
-            return new ArrayList<>(opponentCards);
-        }
-
-        public void setOpponentCards(List<Group.CardEnum> cards) {
-            if (cards == null) {
-                throw new IllegalArgumentException("cards cannot be null");
-            }
-            this.opponentCards = List.copyOf(cards);
-        }
-
-        /**
-         * Represents the outcome of a match played by the team.
-         * The Outcome enum defines the possible states that a match can be in,
-         * such as LOSS, DRAW, or WIN.
-         *
-         * Each enum constant has its number of points associated to it.
-         * That is, the team wins 0 point if they lose a match,
-         * 1 point if the match is drawn and 3 points if they win a match.
-         */
-        enum Outcome {
-
-            /**
-             * The team lost the match.
-             */
-            LOSS(0),
-
-            /**
-             * The match ended in a tie.
-             */
-            DRAW(1),
-
-            /**
-             * The team won the match.
-             */
-            WIN(3);
-
-            private final int points;
-
-            Outcome(int points) {
-                this.points = points;
-            }
-
-            public int getPoints() {
-                return points;
-            }
-        }
-
-        public String getOpponentName() {
-            return opponentName;
-        }
-
-        /**
-         * Returns whether the team plays the match away from home during a double-legged tournament.
-         *
-         * @return true if the match is played away from home during a double-legged tournament,
-         *         false if the match is played at home or if the tournament is single-legged.
-         */
-        public boolean isAway() {
-            return this.isAway;
-        }
-
-        public String getScore() {
-            return score;
-        }
-
-        public void setScore(String score) {
-            scoreInvalid = isScoreInvalid(score);
-            throwExceptionMessage();
-            this.score = score;
-        }
-
-        /**
-         * Returns the number of goals scored by the team in this match.
-         *
-         * @return Number of goals scored.
-         */
-        public int getGoalsScored() {
-            return Integer.parseInt(score.split("-")[0]);
-        }
-
-        /**
-         * Returns the number of goals conceded by the team in this match.
-         *
-         * @return Number of goals conceded.
-         */
-        public int getGoalsConceded() {
-            return Integer.parseInt(score.split("-")[1]);
-        }
-
-        public String getReversedScore() {
-            return getGoalsConceded() +"-"+ getGoalsScored();
-        }
-
-        /**
-         * Returns the team's outcome for the match depending
-         * on the number of goals it scored and conceded.
-         *
-         * @return An enum that represents the result of the match.
-         */
-        public Outcome getOutcome() {
-            if (getGoalsScored() < getGoalsConceded()) {
-                return Outcome.LOSS;
-            } else if (getGoalsScored() == getGoalsConceded()) {
-                return Outcome.DRAW;
-            }
-            return Outcome.WIN;
-        }
-
-        /**
-         * Takes a string representing the score of a match and returns whether its format is incorrect.
-         * A correctly formatted score consists of two non-negative integers separated by a '-'.
-         * Examples of correctly formatted scores: "0-0", "0-2", "1-0", "2-3", "10-20"
-         * Examples of incorrectly formatted scores: "02-1", "3-00", "2- 1", "5s-3"
-         *
-         * @param score The score of a match played by the team.
-         * @return true if the score is incorrectly formatted, false otherwise.
-         */
-        static boolean isScoreInvalid(String score) {
-            String pattern = "^(0|[1-9]\\d*)-(0|[1-9]\\d*)$"; // non-negative integer, hyphen, non-negative integer
-            Pattern regex = Pattern.compile(pattern);
-            Matcher matcher = regex.matcher(score);
-            return !matcher.matches();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Match otherMatch = (Match) obj;
-            return opponentName.equals(otherMatch.opponentName) &&
-                    score.equals(otherMatch.score) && (isAway == otherMatch.isAway) &&
-                    selfCards.equals(otherMatch.selfCards) && opponentCards.equals(otherMatch.opponentCards);
-        }
-
-        public String toString() {
-            return String.format("Match{opponentName=%s, score=%s, isAway=%b, selfCards=%s, opponentCards=%s}",
-                    opponentName, score, isAway, selfCards, opponentCards);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(opponentName, score);
+            super(opponentName, score, selfCards, opponentCards);
         }
     }
 
